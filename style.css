@@ -1,0 +1,23 @@
+.sosimplist {
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.sosimplist input {
+    border : 0px;
+    margin: 3px;
+}
+
+.sosimplist-container-list {
+    margin: 3%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.sosimplist-list {
+    display: inline-block;
+    text-align: left;
+    vertical-align: top;
+    margin: 1.5%;
+}
