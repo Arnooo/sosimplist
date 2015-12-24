@@ -1,5 +1,7 @@
 # - Sosimplist -
-Simple list library in Javascript. **No dependencies**
+<a href="https://codeclimate.com/github/Arnooo/sosimplist"><img src="https://codeclimate.com/github/Arnooo/sosimplist/badges/gpa.svg" /></a>
+
+A simple list library in Javascript. **No dependencies**
 
 This simple list library is inspired by Google Keep application. 
 
