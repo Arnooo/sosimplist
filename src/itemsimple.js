@@ -39,14 +39,15 @@ ItemSimple.prototype.buildView = function() {
             var inputCheckbox = document.createElement('input');
             inputCheckbox.className = 'sosimplist-item-checkbox';
             inputCheckbox.type = 'checkbox';
-            inputCheckbox.placeholder = 'write something';
             inputCheckbox.addEventListener(
                 'change',
                 function() {
                     self_.check_(this.checked);
 
-                    //move item to the right container
-                    self_.parent_.moveItem(self_);
+                    if(self_.parent_){
+                        //move item to the right container
+                        self_.parent_.dispatch('moveItem', self_);
+                    }else{}
                 },
                 false
             );
@@ -71,7 +72,11 @@ ItemSimple.prototype.buildView = function() {
             divDelete.className = 'sosimplist-item-delete';
             divDelete.addEventListener(
                 'click',
-                function() { self_.parent_.removeItem(self_);},
+                function() { 
+                    if(self_.parent_){
+                        self_.parent_.dispatch('removeItem', self_);
+                    }else{}
+                },
                 false
             );
             self_.view_.appendChild(divDelete);

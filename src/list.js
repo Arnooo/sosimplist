@@ -301,6 +301,27 @@ List.prototype.moveItem = function(item) {
     }
 };
 
+/**
+* @public
+* Dispatch event received to the right method
+* @param {string} eventName
+* @param {object} data
+*/
+List.prototype.dispatch = function(eventName, data) {
+    try {
+        var self_ = this;
+        if(eventName === 'moveItem'){
+            self_.moveItem(data);
+        }
+        else if(eventName === 'removeItem'){
+            self_.removeItem(data);
+        }else{}
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
  /**
   * @public
   * @return {string} return view as Element object to be placed in the view

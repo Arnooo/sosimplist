@@ -1,7 +1,7 @@
 {
   "name": "sosimplist",
   "homepage": "https://github.com/Arnooo/sosimplist",
-  "description": "A simple list library in javascript",
+  "description": "A simple list library in javascript. No dependencies, except in developement because of unit testing.",
   "main": "src/sosimplist.js",
   "moduleType": [],
   "keywords": [
