@@ -8,88 +8,80 @@
   * @param {object} parent
   */
  function ItemSimple(parent) {
-    try {
-         var self_ = this;
-         self_.parent_ = parent;
-         self_.id_ = 'sosimplist-item' + (new Date().getTime());
-         self_.checked_ = false;
-         self_.text_ = '';
-         self_.view_ = null;
-    }
-    catch (e) {
-        console.error(e.name + ': ' + e.message);
-    }
+     var self_ = this;
+     self_.parent_ = parent;
+     self_.id_ = 'sosimplist-item' + (new Date().getTime());
+     self_.checked_ = false;
+     self_.text_ = '';
+     self_.view_ = null;
  }
 
  /**
  * @public
  */
 ItemSimple.prototype.buildView = function() {
-    try {
-        var self_ = this;
-        if (self_.view_ === null) {
-            self_.view_ = document.createElement('div');
-            self_.view_.id = self_.id_;
-            self_.view_.className = 'sosimplist-item';
+    var self_ = this;
+    if (self_.view_ === null) {
+        self_.view_ = document.createElement('div');
+        self_.view_.id = self_.id_;
+        self_.view_.className = 'sosimplist-item';
 
-            var divSelector = document.createElement('div');
-            divSelector.className = 'sosimplist-item-selector';
-            self_.view_.appendChild(divSelector);
+        var divSelector = document.createElement('div');
+        divSelector.className = 'sosimplist-item-selector';
+        self_.view_.appendChild(divSelector);
 
-            var inputCheckbox = document.createElement('input');
-            inputCheckbox.className = 'sosimplist-item-checkbox';
-            inputCheckbox.type = 'checkbox';
-            inputCheckbox.addEventListener(
-                'change',
-                function() {
-                    self_.check_(this.checked);
+        var inputCheckbox = document.createElement('input');
+        inputCheckbox.className = 'sosimplist-item-checkbox';
+        inputCheckbox.type = 'checkbox';
+        inputCheckbox.addEventListener(
+            'change',
+            function() {
+                self_.check_(this.checked);
 
-                    if(self_.parent_){
-                        //move item to the right container
-                        self_.parent_.dispatch('moveItem', self_);
-                    }else{}
-                },
-                false
-            );
-            inputCheckbox.checked = self_.checked_;
-            self_.view_.appendChild(inputCheckbox);
+                if(self_.parent_){
+                    //move item to the right container
+                    self_.parent_.dispatch('moveItem', self_);
+                }else{}
+            },
+            false
+        );
+        inputCheckbox.checked = self_.checked_;
+        self_.view_.appendChild(inputCheckbox);
 
-            var inputText = document.createElement('input');
-            inputText.className = 'sosimplist-item-text';
-            inputText.type = 'text';
-            inputText.placeholder = 'write something';
-            inputText.addEventListener(
-                'keyup',
-                function() { self_.text_ = this.value;},
-                false
-            );
-            if (self_.text_ !== '') {
-                inputText.value = self_.text_;
-            }else {}
-            self_.view_.appendChild(inputText);
+        var inputText = document.createElement('input');
+        inputText.className = 'sosimplist-item-text';
+        inputText.type = 'text';
+        inputText.placeholder = 'write something';
+        inputText.addEventListener(
+            'keyup',
+            function(event) { 
+                self_.text_ = this.value;
+            },
+            false
+        );
+        if (self_.text_ !== '') {
+            inputText.value = self_.text_;
+        }else {}
+        self_.view_.appendChild(inputText);
 
-            var divDelete = document.createElement('div');
-            divDelete.className = 'sosimplist-item-delete';
-            divDelete.addEventListener(
-                'click',
-                function() { 
-                    if(self_.parent_){
-                        self_.parent_.dispatch('removeItem', self_);
-                    }else{}
-                },
-                false
-            );
-            self_.view_.appendChild(divDelete);
+        var divDelete = document.createElement('div');
+        divDelete.className = 'sosimplist-item-delete';
+        divDelete.addEventListener(
+            'click',
+            function() { 
+                if(self_.parent_){
+                    self_.parent_.dispatch('removeItem', self_);
+                }else{}
+            },
+            false
+        );
+        self_.view_.appendChild(divDelete);
 
-            //Customize view depending on private members
-            self_.check_(self_.checked_);
-        }
-        else {
-           console.log('Item simple ID = ' + self_.id_ + ', View already builded !');
-        }
+        //Customize view depending on private members
+        self_.check_(self_.checked_);
     }
-    catch (e) {
-        console.error(e.name + ': ' + e.message);
+    else {
+       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
     }
 };
 
@@ -113,11 +105,16 @@ ItemSimple.prototype.serialize = function() {
  */
 ItemSimple.prototype.unserialize = function(str) {
     try {
-        var self_ = this;
-        var content = JSON.parse(str);
-        self_.id_ = content.id_;
-        self_.checked_ = content.checked_;
-        self_.text_ = content.text_;
+        if(str) {
+            var self_ = this;
+            var content = JSON.parse(str);
+            self_.id_ = content.id_;
+            self_.checked_ = content.checked_;
+            self_.text_ = content.text_;
+        }
+        else {
+            throw new Error("Error str = "+str+", does not contain data to unserialize!");
+        }
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -154,17 +151,36 @@ ItemSimple.prototype.unserialize = function(str) {
 * @param {bool} check item or not
 */
 ItemSimple.prototype.check_ = function(check) {
-    var self_ = this;
-    self_.checked_ = check;
+    try {
+        var self_ = this;
 
-    //Enable/disable dragndrop
-    self_.view_.draggable = !self_.checked_;
+        if(check === true || check === false){
+            self_.checked_ = check;
 
-    //hide/show selector
-    if (self_.view_.draggable) {
-        self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'visible';
+            //hide/show selector
+            if(self_.view_ &&
+               self_.view_.getElementsByClassName('sosimplist-item-selector') &&
+               self_.view_.getElementsByClassName('sosimplist-item-selector')[0]){
+
+                //Enable/disable dragndrop
+                self_.view_.draggable = !self_.checked_;
+
+                if (self_.view_.draggable) {
+                    self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'visible';
+                }
+                else {
+                    self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'hidden';
+                }
+            }
+            else {
+                throw new Error("The view = "+self_.view_+" is not initialized correctly!");
+            }
+        }
+        else{
+            throw new Error("check = "+check+", cannot set this value!");
+        }
     }
-    else {
-        self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'hidden';
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
     }
 }

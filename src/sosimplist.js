@@ -216,7 +216,7 @@ Sosimplist.prototype.addList = function() {
         var myList = new List();
         myList.buildView();
         self_.listContainer_.appendChild(myList.getView());
-        self_.mapOfList_[myList.getListId()] = myList;
+        self_.mapOfList_[myList.getId()] = myList;
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);

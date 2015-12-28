@@ -11,22 +11,36 @@ describe("ItemSimple", function() {
     parent = Parent.createInstance();
     itemsimple = new ItemSimple(parent);
     spyOn(parent, "dispatch");
+    spyOn(console, 'error');
   });
 
-  it("should be initialized", function() {
-    var itemId = itemsimple.getId();
-
+  it("should be initialized with default values", function() {
     expect(itemsimple.getView()).toEqual(null);
     expect(itemsimple.getId()).toEqual(itemsimple.id_);
     expect(itemsimple.isChecked()).toEqual(false);
     expect(itemsimple.text_).toEqual('');
-   // expect(itemsimple.parent_).toEqual(undefined);
+    expect(itemsimple.parent_).toEqual(parent);
   });
 
-  describe("when view is build", function() {
+  it("should fail on calling check_ function", function() {
+    itemsimple.check_(false);
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  describe("when view is builded", function() {
     beforeEach(function() {
       itemsimple.buildView();
       setFixtures(itemsimple.getView());
+    });
+
+    it("should not initialized a second time the view calling buildView", function() {
+      itemsimple.buildView();
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it("should fail on calling check_ function with wrong parameter", function() {
+      itemsimple.check_(null);
+      expect(console.error).toHaveBeenCalled();
     });
 
     it("should initialized the view", function() {
@@ -74,11 +88,12 @@ describe("ItemSimple", function() {
 
     describe("when item text changed", function() {
       beforeEach(function() {
-        $('.sosimplist-item-text').val('Task 1');
+        $('.sosimplist-item-text').val('A');
+        $('.sosimplist-item-text').simulate('keyup');
       });
 
       it("should change the text displayed", function() {
-        expect($('.sosimplist-item-text')).toHaveValue('Task 1');
+        expect($('.sosimplist-item-text')).toHaveValue('A');
       });
     });    
 
@@ -90,6 +105,61 @@ describe("ItemSimple", function() {
       it("should dispatch event to parent", function() {
         expect(parent.dispatch).toHaveBeenCalledWith('removeItem', itemsimple);
       });
+    });
+
+    describe("when item is serialize", function() {
+      it("should return the object which contains the main data", function() {
+        var data = itemsimple.serialize();
+        var shouldBeData = {
+            id_: itemsimple.id_,
+            checked_: itemsimple.checked_,
+            text_: itemsimple.text_
+        };
+        expect(data).toEqual(JSON.stringify(shouldBeData));
+      });
+    });
+
+    describe("when item is unserialize", function() {
+      it("should extract data and initialize the item", function() {    
+        var inputData = {
+            id_: itemsimple.id_,
+            checked_: itemsimple.checked_,
+            text_: itemsimple.text_
+        };    
+        itemsimple.unserialize(JSON.stringify(inputData));
+        expect(itemsimple.getId()).toEqual(inputData.id_);
+        expect(itemsimple.checked_).toEqual(inputData.checked_);
+        expect(itemsimple.text_).toEqual(inputData.text_);
+      });
+
+      it("should fail when we do not send data to extract in parameter", function() { 
+        itemsimple.unserialize();
+        expect(console.error).toHaveBeenCalled();
+      });
+    });
+  });
+  describe("when data are unserialized and view is build", function() {
+    beforeEach(function() {
+        var inputData = {
+            id_: 123,
+            checked_: true,
+            text_: 'InitText'
+        };    
+        itemsimple.unserialize(JSON.stringify(inputData));
+        itemsimple.buildView();
+        setFixtures(itemsimple.getView());
+    });
+
+    it("should initialize the text", function() {
+      expect(itemsimple.text_).toEqual('InitText');
+      expect($('.sosimplist-item-text')).toHaveValue('InitText');
+    });
+    it("should initialize the checkbox", function() {
+      expect(itemsimple.isChecked()).toEqual(true);
+      expect($('.sosimplist-item-checkbox').is(":checked")).toBe(true);
+    });
+    it("should initialize the id", function() {
+      expect(itemsimple.getId()).toEqual(123);
     });
   });
 });

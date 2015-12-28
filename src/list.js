@@ -235,7 +235,7 @@ List.prototype.unserialize = function(str) {
 * @public
 * @return {string} return list id
 */
-List.prototype.getListId = function() {
+List.prototype.getId = function() {
     return this.id_;
 };
 
