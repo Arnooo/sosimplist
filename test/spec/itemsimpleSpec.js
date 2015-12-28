@@ -107,8 +107,8 @@ describe("ItemSimple", function() {
       });
     });
 
-    describe("when item is serialize", function() {
-      it("should return the object which contains the main data", function() {
+    describe("when item is serialized", function() {
+      it("should return a JSON object which contains the main data", function() {
         var data = itemsimple.serialize();
         var shouldBeData = {
             id_: itemsimple.id_,
@@ -119,7 +119,7 @@ describe("ItemSimple", function() {
       });
     });
 
-    describe("when item is unserialize", function() {
+    describe("when item is unserialized", function() {
       it("should extract data and initialize the item", function() {    
         var inputData = {
             id_: itemsimple.id_,

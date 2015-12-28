@@ -256,6 +256,22 @@ Sosimplist.prototype.clearAll = function() {
     }
 };
 
+ /**
+  * @public
+  * @return {string} return view as Element object to be placed in the DOM
+  */
+ Sosimplist.prototype.getView = function() {
+     return this.view_;
+ };
+
+/**
+* @public
+* @return {string} return Sosimplist id
+*/
+Sosimplist.prototype.getId = function() {
+    return this.viewId_;
+};
+
 /**
  * @private
  * @param {string} viewId

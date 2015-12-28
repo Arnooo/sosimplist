@@ -7,22 +7,17 @@
   * @constructor
   */
  function List() {
-     try {
-         var self_ = this;
-         self_.id_ = 'sosimplist-list' + (new Date().getTime());
-         self_.view_ = null;
-         self_.title_ = '';
-         self_.mapOfItem_ = {};
-         self_.checkedVisible_ = false;
-         self_.dropdownButtonVisible_ = false;
-         self_.dragData = null;
+     var self_ = this;
+     self_.id_ = 'sosimplist-list' + (new Date().getTime());
+     self_.view_ = null;
+     self_.title_ = '';
+     self_.mapOfItem_ = {};
+     self_.checkedVisible_ = false;
+     self_.dropdownButtonVisible_ = false;
+     self_.dragData = null;
 
-         //add default item
-         self_.addItem();
-    }
-    catch (e) {
-        console.error(e.name + ': ' + e.message);
-    }
+     //add default item
+     self_.addItem();
  }
 
  /**
@@ -53,7 +48,7 @@ List.prototype.buildView = function() {
              self_.view_.appendChild(inputTitle);
 
              self_.itemContainer_ = document.createElement('div');
-             self_.itemContainer_.id = 'sosimplist-container-item';
+             self_.itemContainer_.className = 'sosimplist-container-item';
              self_.itemContainer_.addEventListener(
                  'dragstart',
                  function(event) {
@@ -138,7 +133,6 @@ List.prototype.buildView = function() {
              var dropdownList = document.createElement('div');
              dropdownList.className = 'sosimplist-list-dropdown-checked';
              dropdownList.value = 'click';
-
              dropdownList.addEventListener(
                  'click',
                  function() {
@@ -175,7 +169,7 @@ List.prototype.buildView = function() {
              self_.setVisibility_();
          }
          else {
-            console.log('List ID = ' + self_.id_ + ', View already builded !');
+            console.error('List ID = ' + self_.id_ + ', View already builded !');
          }
     }
     catch (e) {
