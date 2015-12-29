@@ -85,8 +85,59 @@ describe("List", function() {
       });
     }); 
 
+    describe("when add item button is clicked", function() {
+      beforeEach(function() {
+        $('#sosimplist-button-add-item').trigger('click');
+      });
+
+      it("should add an item to the list", function() {
+        var count = 0;
+        for (var itemId in list.mapOfItem_) {
+            count++;
+        }
+        expect(count).toEqual(2);
+      });
+    });
+
+    describe("when dropdown menu (which hide checked item) is clicked", function() {
+      beforeEach(function() {
+        $('.sosimplist-list-dropdown-checked').trigger('click');
+      });
+
+      it("should show the list of checked elements", function() {
+        expect(list.checkedVisible_).toEqual(true);
+        expect($('.sosimplist-container-item-checked')[0].style.display).toEqual('');
+      });
+
+      it("should hide the list of checked elements when clicked again", function() {
+        $('.sosimplist-list-dropdown-checked').trigger('click');
+        expect(list.checkedVisible_).toEqual(false);
+        expect($('.sosimplist-container-item-checked')[0].style.display).toEqual('none');
+      });
+    });
+
+
+
+    describe("when an item is removed", function() {
+      beforeEach(function() {
+        for (var itemId in list.mapOfItem_) {
+            list.dispatch('removeItem', list.mapOfItem_[itemId]);
+        }
+      });
+
+      it("should remove an item from the list", function() {
+        expect(list.mapOfItem_).toEqual({});
+      });
+
+      it("should hide the dropdown menu if there is no more item checked to display", function() {
+        expect(list.checkedVisible_).toEqual(false);
+        expect($('.sosimplist-container-item-checked')[0].style.display).toEqual('none');
+        expect($('.sosimplist-list-dropdown-checked')[0].style.display).toEqual('none');
+      });
+    });
+
     describe("when list is serialized", function() {
-      it("should return a JSON object encoded in base64 which contains the main data", function() {
+      it("should return a JSON object which contains the main data", function() {
         var data = list.serialize();
         var shouldBeData = {
             id_: list.id_,
@@ -96,7 +147,7 @@ describe("List", function() {
         for (var itemId in list.mapOfItem_) {
             shouldBeData.arrayOfItem_.push(list.mapOfItem_[itemId].serialize());
         }
-        expect(data).toEqual(btoa(JSON.stringify(shouldBeData)));
+        expect(data).toEqual(JSON.stringify(shouldBeData));
       });
     });
 
@@ -110,7 +161,7 @@ describe("List", function() {
         for (var itemId in list.mapOfItem_) {
             inputData.arrayOfItem_.push(list.mapOfItem_[itemId].serialize());
         }
-        list.unserialize(btoa(JSON.stringify(inputData)));
+        list.unserialize(JSON.stringify(inputData));
         expect(list.getId()).toEqual(inputData.id_);
         expect(list.title_).toEqual(inputData.title_);
       });
@@ -120,7 +171,28 @@ describe("List", function() {
         expect(console.error).toHaveBeenCalled();
       });
     });
-
   });
+    describe("when data are unserialized and view is build", function() {
+        beforeEach(function() {
+            var inputData = {
+                id_: 1234,
+                title_: 'Title Test',
+                arrayOfItem_: []
+            };    
+            for (var itemId in list.mapOfItem_) {
+                inputData.arrayOfItem_.push(list.mapOfItem_[itemId].serialize());
+            }
+            list.unserialize(JSON.stringify(inputData));
+            list.buildView();
+            setFixtures(list.getView());
+        });
 
+        it("should initialize the Title", function() {
+          expect(list.title_).toEqual('Title Test');
+          expect($('.sosimplist-title')).toHaveValue('Title Test');
+        });
+        it("should initialize the id", function() {
+          expect(list.getId()).toEqual(1234);
+        });
+    });
 });

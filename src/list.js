@@ -119,6 +119,7 @@ List.prototype.buildView = function() {
              self_.view_.appendChild(self_.itemContainer_);
 
              var buttonAddItem = document.createElement('input');
+             buttonAddItem.id = 'sosimplist-button-add-item';
              buttonAddItem.className = 'sosimplist-button';
              buttonAddItem.type = 'button';
              buttonAddItem.value = 'Add item';
@@ -195,7 +196,7 @@ List.prototype.serialize = function() {
         for (var i = 0; i < self_.itemContainerChecked_.children.length; i++) {
             content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainerChecked_.children[i].id].serialize());
         }
-        return btoa(JSON.stringify(content));
+        return JSON.stringify(content);
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -209,7 +210,7 @@ List.prototype.serialize = function() {
 List.prototype.unserialize = function(str) {
     try {
         var self_ = this;
-        var content = JSON.parse(atob(str));
+        var content = JSON.parse(str);
         self_.id_ = content.id_;
         self_.title_ = content.title_;
         self_.mapOfItem_ = {};
@@ -260,13 +261,14 @@ List.prototype.addItem = function() {
 List.prototype.removeItem = function(item) {
     try {
         var self_ = this;
-        self_.mapOfItem_[item.getId()] = undefined;
         if(self_.itemContainer_.contains(document.getElementById(item.getId()))){
             self_.itemContainer_.removeChild(document.getElementById(item.getId()));
         }
         else{
             self_.itemContainerChecked_.removeChild(document.getElementById(item.getId()));
         }
+        self_.mapOfItem_[item.getId()] = undefined;
+        delete self_.mapOfItem_[item.getId()];
         self_.setVisibility_();
     }
     catch (e) {
