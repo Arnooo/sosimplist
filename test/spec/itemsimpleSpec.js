@@ -3,6 +3,7 @@ describe("ItemSimple", function() {
   var itemsimple;
 
   beforeEach(function() {
+    SAVE_DATA_IN_URL = 0;
     var Parent = function(){};
     Parent.prototype.dispatch = function(eventName, data) {};
     Parent.createInstance = function() {

@@ -2,6 +2,7 @@ describe("Sosimplist", function() {
   var sosimplist; 
 
   beforeEach(function() {
+    SAVE_DATA_IN_URL = 0;
     sosimplist = new Sosimplist();
     spyOn(console, 'error');
   });
@@ -32,10 +33,45 @@ describe("Sosimplist", function() {
       expect($('.sosimplist-container-list')).toBeInDOM(true);
       expect($('.sosimplist-container-list')).toEqual('div');
 
-      expect($('.sosimplist-button')).toBeInDOM(true);
-      expect($('.sosimplist-button')).toEqual('input');
-      expect($('.sosimplist-button')).toHaveAttr('type', 'button');
-     // expect($('.sosimplist-button')).toHaveValue('Add List');
+      expect($('#sosimplist-button-add-list')).toBeInDOM(true);
+      expect($('#sosimplist-button-add-list')).toEqual('input');
+      expect($('#sosimplist-button-add-list')).toHaveAttr('type', 'button');
+      expect($('#sosimplist-button-add-list')).toHaveValue('Add list');
+
+      expect($('#sosimplist-button-clear')).toBeInDOM(true);
+      expect($('#sosimplist-button-clear')).toEqual('input');
+      expect($('#sosimplist-button-clear')).toHaveAttr('type', 'button');
+      expect($('#sosimplist-button-clear')).toHaveValue('Clear');
+    });
+
+    describe("when add list button is clicked", function() {
+      beforeEach(function() {
+        $('#sosimplist-button-add-list').trigger('click');
+      });
+
+      it("should add list", function() {
+        var count = 0;
+        for (var listId in sosimplist.mapOfList_) {
+            count++;
+        }
+        expect(count).toEqual(1);
+        expect($('.sosimplist-container-list')[0].children.length).toEqual(1);
+      });
+
+      describe("when clear button is clicked", function() {
+        beforeEach(function() {
+          $('#sosimplist-button-clear').trigger('click');
+        });
+
+        it("should remove all lists", function() {
+          var count = 0;
+          for (var listId in sosimplist.mapOfList_) {
+              count++;
+          }
+          expect(count).toEqual(0);
+          expect($('.sosimplist-container-list')[0].children.length).toEqual(0);
+        });
+      });
     });
 
     describe("when sosimplist is serialized", function() {

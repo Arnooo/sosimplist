@@ -7,7 +7,7 @@
  /**
   * Constant
   */
-var DEBUG = 1;
+var SAVE_DATA_IN_URL = 1;
 
 /**
  * @private
@@ -143,6 +143,7 @@ Sosimplist.prototype.init = function(viewId) {
 
         var buttonAddList = document.createElement('input');
             buttonAddList.className = 'sosimplist-button';
+            buttonAddList.id = 'sosimplist-button-add-list';
             buttonAddList.type = 'button';
             buttonAddList.value = 'Add list';
             buttonAddList.addEventListener(
@@ -154,6 +155,7 @@ Sosimplist.prototype.init = function(viewId) {
 
         var buttonClear = document.createElement('input');
             buttonClear.className = 'sosimplist-button';
+            buttonClear.id = 'sosimplist-button-clear';
             buttonClear.type = 'button';
             buttonClear.value = 'Clear';
             buttonClear.addEventListener(
@@ -225,20 +227,6 @@ Sosimplist.prototype.addList = function() {
 
 /**
  * @public
- * @param {string} listId
- */
-Sosimplist.prototype.addItem = function(listId) {
-    try {
-        var self_ = this;
-        self_.mapOfList_[listId].addItem();
-    }
-    catch (e) {
-        console.error(e.name + ': ' + e.message);
-    }
-};
-
-/**
- * @public
  */
 Sosimplist.prototype.clearAll = function() {
     try {
@@ -278,7 +266,9 @@ Sosimplist.prototype.getId = function() {
  */
 Sosimplist.prototype.updateLocation_ = function(viewId) {
     var self_ = this;
-    window.location.href = window.location.href.split('#')[0] + '#' + self_.serialize();
+    if(SAVE_DATA_IN_URL){
+        window.location.href = window.location.href.split('#')[0] + '#' + self_.serialize();
+    }
     //console.log("Location changed !");
 };
 

@@ -2,6 +2,7 @@ describe("List", function() {
   var list; 
 
   beforeEach(function() {
+    SAVE_DATA_IN_URL = 0;
     list = new List();
     spyOn(console, 'error');
   });
@@ -116,16 +117,43 @@ describe("List", function() {
       });
     });
 
+    describe("when all items are checked", function() {
+      beforeEach(function() {
+        for (var itemId in list.mapOfItem_) {
+            list.mapOfItem_[itemId].check_(true);
+            list.dispatch('moveItem', list.mapOfItem_[itemId]);
+        }
+      });
 
+      it("should move all items from the list to the selected list", function() {
+        expect($('.sosimplist-container-item')[0].children.length).toEqual(0);
+        expect($('.sosimplist-container-item-checked')[0].children.length).toEqual(1);
+      });
 
-    describe("when an item is removed", function() {
+      it("should show the dropdown menu", function() {
+        expect(list.checkedVisible_).toEqual(false);
+        expect($('.sosimplist-container-item-checked')[0].style.display).toEqual('none');
+        expect($('.sosimplist-list-dropdown-checked')[0].style.display).toEqual('');
+      });
+
+      it("should restore the item to the main list when all items are checked again", function() {
+        for (var itemId in list.mapOfItem_) {
+            list.mapOfItem_[itemId].check_(false);
+            list.dispatch('moveItem', list.mapOfItem_[itemId]);
+        }
+        expect($('.sosimplist-container-item')[0].children.length).toEqual(1);
+        expect($('.sosimplist-container-item-checked')[0].children.length).toEqual(0);
+      });
+    });
+
+    describe("when all items are removed", function() {
       beforeEach(function() {
         for (var itemId in list.mapOfItem_) {
             list.dispatch('removeItem', list.mapOfItem_[itemId]);
         }
       });
 
-      it("should remove an item from the list", function() {
+      it("should remove all items from the list", function() {
         expect(list.mapOfItem_).toEqual({});
       });
 
