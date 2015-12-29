@@ -5,9 +5,11 @@
  /**
   * @public
   * @constructor
+  * @param {object} options is used to configure the list
   */
- function List() {
+ function List(options) {
      var self_ = this;
+     self_.options_ = options;
      self_.id_ = 'sosimplist-list' + (new Date().getTime());
      self_.view_ = null;
      self_.title_ = '';
@@ -30,7 +32,10 @@ List.prototype.buildView = function() {
              self_.view_ = document.createElement('div');
              self_.view_.id = self_.id_;
              self_.view_.className = 'sosimplist-list';
-             self_.view_.draggable = true;
+
+             if(self_.options_.edit){
+                self_.view_.draggable = true;
+             }else{}
 
              var inputTitle = document.createElement('input');
              inputTitle.id = 'sosimplist-title' + self_.id_;
@@ -118,17 +123,19 @@ List.prototype.buildView = function() {
              );
              self_.view_.appendChild(self_.itemContainer_);
 
-             var buttonAddItem = document.createElement('input');
-             buttonAddItem.id = 'sosimplist-button-add-item';
-             buttonAddItem.className = 'sosimplist-button';
-             buttonAddItem.type = 'button';
-             buttonAddItem.value = 'Add item';
-             buttonAddItem.addEventListener(
-                 'click',
-                 function() { self_.addItem(); },
-                 false
-             );
-             self_.view_.appendChild(buttonAddItem);
+             if(self_.options_.edit){
+                 var buttonAddItem = document.createElement('input');
+                 buttonAddItem.id = 'sosimplist-button-add-item';
+                 buttonAddItem.className = 'sosimplist-button';
+                 buttonAddItem.type = 'button';
+                 buttonAddItem.value = 'Add item';
+                 buttonAddItem.addEventListener(
+                     'click',
+                     function() { self_.addItem(); },
+                     false
+                 );
+                 self_.view_.appendChild(buttonAddItem);
+             }else{}
 
 
              var dropdownList = document.createElement('div');
@@ -215,7 +222,7 @@ List.prototype.unserialize = function(str) {
         self_.title_ = content.title_;
         self_.mapOfItem_ = {};
         for (var i = 0; i < content.arrayOfItem_.length; i++) {
-            var myItem = new ItemSimple(self_);
+            var myItem = new ItemSimple(self_, self_.options_);
             myItem.unserialize(content.arrayOfItem_[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
@@ -241,7 +248,7 @@ List.prototype.getId = function() {
 List.prototype.addItem = function() {
     try {
         var self_ = this;
-        var myItem = new ItemSimple(self_);
+        var myItem = new ItemSimple(self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {

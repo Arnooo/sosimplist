@@ -6,11 +6,13 @@
   * @public
   * @constructor
   * @param {object} parent
+  * @param {object} options is used to configure the itemsimple
   */
- function ItemSimple(parent) {
-    DEBUGCheckArgumentsAreValids(arguments, 1);
+ function ItemSimple(parent, options) {
+    DEBUGCheckArgumentsAreValids(arguments, 2);
     var self_ = this;
     self_.parent_ = parent;
+    self_.options_ = options;
     self_.id_ = 'sosimplist-item' + (new Date().getTime());
     self_.checked_ = false;
     self_.text_ = '';
@@ -27,9 +29,11 @@ ItemSimple.prototype.buildView = function() {
         self_.view_.id = self_.id_;
         self_.view_.className = 'sosimplist-item';
 
-        var divSelector = document.createElement('div');
-        divSelector.className = 'sosimplist-item-selector';
-        self_.view_.appendChild(divSelector);
+        if(self_.options_.edit){
+            var divSelector = document.createElement('div');
+            divSelector.className = 'sosimplist-item-selector';
+            self_.view_.appendChild(divSelector);
+        }else{}
 
         var inputCheckbox = document.createElement('input');
         inputCheckbox.className = 'sosimplist-item-checkbox';
@@ -50,6 +54,10 @@ ItemSimple.prototype.buildView = function() {
         self_.view_.appendChild(inputCheckbox);
 
         var inputText = document.createElement('input');
+        //enable eddition
+        if(self_.options_.edit){   
+           // inputText.edditable = true;
+        }
         inputText.className = 'sosimplist-item-text';
         inputText.type = 'text';
         inputText.placeholder = 'write something';
@@ -65,18 +73,20 @@ ItemSimple.prototype.buildView = function() {
         }else {}
         self_.view_.appendChild(inputText);
 
-        var divDelete = document.createElement('div');
-        divDelete.className = 'sosimplist-item-delete';
-        divDelete.addEventListener(
-            'click',
-            function() { 
-                if(self_.parent_){
-                    self_.parent_.dispatch('removeItem', self_);
-                }else{}
-            },
-            false
-        );
-        self_.view_.appendChild(divDelete);
+        if(self_.options_.edit){    
+            var divDelete = document.createElement('div');
+            divDelete.className = 'sosimplist-item-delete';
+            divDelete.addEventListener(
+                'click',
+                function() { 
+                    if(self_.parent_){
+                        self_.parent_.dispatch('removeItem', self_);
+                    }else{}
+                },
+                false
+            );
+            self_.view_.appendChild(divDelete);
+        }else{}
 
         //Customize view depending on private members
         self_.check_(self_.checked_);
@@ -115,7 +125,7 @@ ItemSimple.prototype.unserialize = function(str) {
             self_.text_ = content.text_;
         }
         else {
-            throw new Error("Error str = "+str+", does not contain data to unserialize!");
+            throw new Error("Input str = "+str+", does not contain data to unserialize!");
         }
     }
     catch (e) {
@@ -161,23 +171,25 @@ ItemSimple.prototype.check_ = function(check) {
         if(check === true || check === false){
             self_.checked_ = check;
 
-            //hide/show selector
-            if(self_.view_ &&
-               self_.view_.getElementsByClassName('sosimplist-item-selector') &&
-               self_.view_.getElementsByClassName('sosimplist-item-selector')[0]){
+            if(self_.options_.edit){
+                //hide/show selector
+                if(self_.view_ &&
+                   self_.view_.getElementsByClassName('sosimplist-item-selector') &&
+                   self_.view_.getElementsByClassName('sosimplist-item-selector')[0]){
 
-                //Enable/disable dragndrop
-                self_.view_.draggable = !self_.checked_;
+                    //Enable/disable dragndrop
+                    self_.view_.draggable = !self_.checked_;
 
-                if (self_.view_.draggable) {
-                    self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'visible';
+                    if (self_.view_.draggable) {
+                        self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'visible';
+                    }
+                    else {
+                        self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'hidden';
+                    }
                 }
                 else {
-                    self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'hidden';
+                    throw new Error("The view = "+self_.view_+" is not initialized correctly!");
                 }
-            }
-            else {
-                throw new Error("The view = "+self_.view_+" is not initialized correctly!");
             }
         }
         else{

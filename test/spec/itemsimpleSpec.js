@@ -3,14 +3,13 @@ describe("ItemSimple", function() {
   var itemsimple;
 
   beforeEach(function() {
-    SAVE_DATA_IN_URL = 0;
     var Parent = function(){};
     Parent.prototype.dispatch = function(eventName, data) {};
     Parent.createInstance = function() {
       return new Parent();
     };
     parent = Parent.createInstance();
-    itemsimple = new ItemSimple(parent);
+    itemsimple = new ItemSimple(parent, {edit:true});
     spyOn(parent, "dispatch");
     spyOn(console, 'error');
   });

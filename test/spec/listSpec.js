@@ -2,8 +2,7 @@ describe("List", function() {
   var list; 
 
   beforeEach(function() {
-    SAVE_DATA_IN_URL = 0;
-    list = new List();
+    list = new List({edit:true});
     spyOn(console, 'error');
   });
 

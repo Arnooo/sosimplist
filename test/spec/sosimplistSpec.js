@@ -2,7 +2,6 @@ describe("Sosimplist", function() {
   var sosimplist; 
 
   beforeEach(function() {
-    SAVE_DATA_IN_URL = 0;
     sosimplist = new Sosimplist();
     spyOn(console, 'error');
   });
@@ -18,7 +17,7 @@ describe("Sosimplist", function() {
   describe("when view is builded", function() {
     beforeEach(function() {
       setFixtures('<div id=myView></div>');
-      sosimplist.init('myView');
+      sosimplist.init('myView', {save:E_SAVE_IN.NONE});
       setFixtures(sosimplist.getView());
     });
 
@@ -28,6 +27,9 @@ describe("Sosimplist", function() {
     });
 
     it("should initialized the view", function() {
+
+      expect(sosimplist.options_).toEqual({save:E_SAVE_IN.NONE, edit:true, checkable : true});
+
       expect(sosimplist.getView()).not.toEqual(null);
       
       expect($('.sosimplist-container-list')).toBeInDOM(true);
@@ -103,4 +105,29 @@ describe("Sosimplist", function() {
 
   });
 
+  describe("when view is builded with options {edit:false}", function() {
+    beforeEach(function() {
+      setFixtures('<div id=myView></div>');
+      sosimplist.init('myView', {edit:false});
+      setFixtures(sosimplist.getView());
+    });
+
+    it("should init list mangager with correct options", function() {
+      expect(sosimplist.options_.edit).toEqual(false);
+    });
+
+  });
+
+  describe("when view is builded with options which does not exist", function() {
+    beforeEach(function() {
+      setFixtures('<div id=myView></div>');
+      sosimplist.init('myView', {patate:'frite'});
+      setFixtures(sosimplist.getView());
+    });
+
+    it("should fail", function() {
+      expect(console.error).toHaveBeenCalled();
+    });
+
+  });
 });

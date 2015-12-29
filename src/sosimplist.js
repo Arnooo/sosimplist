@@ -7,7 +7,11 @@
  /**
   * Constant
   */
-var SAVE_DATA_IN_URL = 1;
+var E_SAVE_IN = {
+    NONE : 0,
+    URL : 1,
+    FIREBASE : 2
+}
 
 /**
  * @private
@@ -20,6 +24,11 @@ function Sosimplist() {
     self_.viewId_ = '';
     self_.view_ = null;
     self_.mapOfList_ = {};
+    self_.options_ = {
+        save : E_SAVE_IN.URL,
+        edit : true, // edit / remove / add
+        checkable: true  // can check list item or not
+    };
 
     //load data from URI
     var hrefArray = window.location.href.split('#');
@@ -30,12 +39,28 @@ function Sosimplist() {
 
 /**
  * @public
- * @param {string} viewId
+ * @param {string} viewId is the element Id where to display the list manager
+ * @param {object} options is used to configure the list manager
  */
-Sosimplist.prototype.init = function(viewId) {
+Sosimplist.prototype.init = function(viewId, options) {
     try {
         var self_ = this;
         self_.viewId_ = viewId;
+
+        //merge options
+        if(options){
+            for(var opt in options){
+                if(self_.options_[opt]){
+                    self_.options_[opt] = options[opt];
+                }
+                else{
+                    throw new Error("Option = "+opt+" options[opt] = "+options[opt]+", does not exist in this version!");
+                }
+            }
+        }
+
+        /// @TODO clear all elment in the view before adding ours
+        //self_.view_
 
         //build view
         self_.view_ = document.getElementById(this.viewId_);
@@ -141,29 +166,32 @@ Sosimplist.prototype.init = function(viewId) {
             self_.listContainer_.appendChild(self_.mapOfList_[listId].getView());
         }
 
-        var buttonAddList = document.createElement('input');
-            buttonAddList.className = 'sosimplist-button';
-            buttonAddList.id = 'sosimplist-button-add-list';
-            buttonAddList.type = 'button';
-            buttonAddList.value = 'Add list';
-            buttonAddList.addEventListener(
-                'click',
-                function() {self_.addList();},
-                false
-            );
-        self_.view_.appendChild(buttonAddList);
+        if(self_.options_.edit){
+            var buttonAddList = document.createElement('input');
+                buttonAddList.className = 'sosimplist-button';
+                buttonAddList.id = 'sosimplist-button-add-list';
+                buttonAddList.type = 'button';
+                buttonAddList.value = 'Add list';
+                buttonAddList.addEventListener(
+                    'click',
+                    function() {self_.addList();},
+                    false
+                );
+            self_.view_.appendChild(buttonAddList);
 
-        var buttonClear = document.createElement('input');
-            buttonClear.className = 'sosimplist-button';
-            buttonClear.id = 'sosimplist-button-clear';
-            buttonClear.type = 'button';
-            buttonClear.value = 'Clear';
-            buttonClear.addEventListener(
-                'click',
-                function() {self_.clearAll();},
-                false
-            );
-        self_.view_.appendChild(buttonClear);
+            var buttonClear = document.createElement('input');
+                buttonClear.className = 'sosimplist-button';
+                buttonClear.id = 'sosimplist-button-clear';
+                buttonClear.type = 'button';
+                buttonClear.value = 'Clear';
+                buttonClear.addEventListener(
+                    'click',
+                    function() {self_.clearAll();},
+                    false
+                );
+            self_.view_.appendChild(buttonClear);
+        }
+        else{}
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -198,7 +226,7 @@ Sosimplist.prototype.unserialize = function(str) {
         self_.viewId_ = content.viewId_;
         self_.mapOfList_ = {};
         for (var listId in content.mapOfList_) {
-            var myList = new List();
+            var myList = new List(self_.options_);
             myList.unserialize(content.mapOfList_[listId]);
             myList.buildView();
             self_.mapOfList_[listId] = myList;
@@ -215,7 +243,7 @@ Sosimplist.prototype.unserialize = function(str) {
 Sosimplist.prototype.addList = function() {
     try {
         var self_ = this;
-        var myList = new List();
+        var myList = new List(self_.options_);
         myList.buildView();
         self_.listContainer_.appendChild(myList.getView());
         self_.mapOfList_[myList.getId()] = myList;
@@ -266,7 +294,7 @@ Sosimplist.prototype.getId = function() {
  */
 Sosimplist.prototype.updateLocation_ = function(viewId) {
     var self_ = this;
-    if(SAVE_DATA_IN_URL){
+    if(E_SAVE_IN.URL === self_.options_.save){
         window.location.href = window.location.href.split('#')[0] + '#' + self_.serialize();
     }
     //console.log("Location changed !");
