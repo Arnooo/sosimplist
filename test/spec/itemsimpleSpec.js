@@ -60,10 +60,10 @@ describe("ItemSimple", function() {
       expect($('.sosimplist-item-checkbox').is(":checked")).toBe(false);
 
       expect($('.sosimplist-item-text')).toBeInDOM(true);
-      expect($('.sosimplist-item-text')).toEqual('input');
-      expect($('.sosimplist-item-text')).toHaveAttr('type', 'text');
+      expect($('.sosimplist-item-text')).toEqual('div');
+      expect($('.sosimplist-item-text')).toHaveAttr('contentEditable', 'true');
       expect($('.sosimplist-item-text')).toHaveAttr('placeholder', 'write something');
-      expect($('.sosimplist-item-text')).toHaveValue('');
+      expect($('.sosimplist-item-text')[0].innerHTML).toEqual('');
 
       expect($('.sosimplist-item-delete')).toBeInDOM(true);
       expect($('.sosimplist-item-delete')).toEqual('div');
@@ -88,12 +88,13 @@ describe("ItemSimple", function() {
 
     describe("when item text changed", function() {
       beforeEach(function() {
-        $('.sosimplist-item-text').val('A');
+        $('.sosimplist-item-text')[0].innerHTML = 'A';
         $('.sosimplist-item-text').simulate('keyup');
       });
 
       it("should change the text displayed", function() {
-        expect($('.sosimplist-item-text')).toHaveValue('A');
+        expect($('.sosimplist-item-text')[0].innerHTML).toEqual('A');
+        expect(itemsimple.text_).toEqual('A');
       });
     });    
 
@@ -152,7 +153,7 @@ describe("ItemSimple", function() {
 
     it("should initialize the text", function() {
       expect(itemsimple.text_).toEqual('InitText');
-      expect($('.sosimplist-item-text')).toHaveValue('InitText');
+      expect($('.sosimplist-item-text')[0].innerHTML).toEqual('InitText');
     });
     it("should initialize the checkbox", function() {
       expect(itemsimple.isChecked()).toEqual(true);

@@ -46,10 +46,10 @@ describe("List", function() {
       expect($('.sosimplist-list')).toHaveAttr('draggable', 'true');
 
       expect($('.sosimplist-title')).toBeInDOM(true);
-      expect($('.sosimplist-title')).toEqual('input');
-      expect($('.sosimplist-title')).toHaveAttr('type', 'text');
+      expect($('.sosimplist-title')).toEqual('div');
+      expect($('.sosimplist-title')).toHaveAttr('contentEditable', 'true');
       expect($('.sosimplist-title')).toHaveAttr('placeholder', 'Title');
-      expect($('.sosimplist-title')).toHaveValue('');
+      expect($('.sosimplist-title')[0].innerHTML).toEqual('');
 
       expect($('.sosimplist-container-item')).toBeInDOM(true);
       expect($('.sosimplist-container-item')).toEqual('div');
@@ -76,12 +76,13 @@ describe("List", function() {
 
     describe("when list title changed", function() {
       beforeEach(function() {
-        $('.sosimplist-title').val('A');
+        $('.sosimplist-title')[0].innerHTML = 'A';
         $('.sosimplist-title').simulate('keyup');
       });
 
       it("should change the text displayed", function() {
-        expect($('.sosimplist-title')).toHaveValue('A');
+        expect($('.sosimplist-title')[0].innerHTML).toEqual('A');
+        expect(list.title_).toEqual('A');
       });
     }); 
 
@@ -216,7 +217,7 @@ describe("List", function() {
 
         it("should initialize the Title", function() {
           expect(list.title_).toEqual('Title Test');
-          expect($('.sosimplist-title')).toHaveValue('Title Test');
+          expect($('.sosimplist-title')[0].innerHTML).toEqual('Title Test');
         });
         it("should initialize the id", function() {
           expect(list.getId()).toEqual(1234);

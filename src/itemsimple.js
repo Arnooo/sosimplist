@@ -53,23 +53,22 @@ ItemSimple.prototype.buildView = function() {
         inputCheckbox.checked = self_.checked_;
         self_.view_.appendChild(inputCheckbox);
 
-        var inputText = document.createElement('input');
+        var inputText = document.createElement('div');
         //enable eddition
         if(self_.options_.edit){   
-           // inputText.edditable = true;
+            inputText.contentEditable = true;
         }
-        inputText.className = 'sosimplist-item-text';
-        inputText.type = 'text';
-        inputText.placeholder = 'write something';
+        inputText.className = 'sosimplist-item-text sosimplist-editable';
+        inputText.setAttribute('placeholder','write something');
         inputText.addEventListener(
             'keyup',
             function(event) { 
-                self_.text_ = this.value;
+                self_.text_ = this.innerHTML;
             },
             false
         );
         if (self_.text_ !== '') {
-            inputText.value = self_.text_;
+            inputText.innerHTML = self_.text_;
         }else {}
         self_.view_.appendChild(inputText);
 

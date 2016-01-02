@@ -37,18 +37,22 @@ List.prototype.buildView = function() {
                 self_.view_.draggable = true;
              }else{}
 
-             var inputTitle = document.createElement('input');
+             var inputTitle = document.createElement('div');
+             //enable eddition
+             if(self_.options_.edit){   
+                inputTitle.contentEditable = true;
+             }
              inputTitle.id = 'sosimplist-title' + self_.id_;
-             inputTitle.className = 'sosimplist-title';
+             inputTitle.className = 'sosimplist-title sosimplist-editable';
              inputTitle.type = 'text';
-             inputTitle.placeholder = 'Title';
+             inputTitle.setAttribute('placeholder','Title');
              inputTitle.addEventListener(
                  'keyup',
-                 function() { self_.title_ = this.value;},
+                 function() { self_.title_ = this.innerHTML;},
                  false
              );
              if (self_.title_ !== '') {
-                inputTitle.value = self_.title_;
+                inputTitle.innerHTML = self_.title_;
              }else {}
              self_.view_.appendChild(inputTitle);
 
