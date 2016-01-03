@@ -248,15 +248,22 @@ List.prototype.getId = function() {
 /**
 * @public
 * Add item to this list
+* @param {object} itemElementCurrent used as index to create the new item element.
 */
-List.prototype.addItem = function() {
+List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
         var myItem = new ItemSimple(self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
-            self_.itemContainer_.appendChild(myItem.getView());
+            if(itemElementCurrent){
+                self_.itemContainer_.insertBefore(myItem.getView(), itemElementCurrent.nextSibling);
+            }
+            else{
+                self_.itemContainer_.appendChild(myItem.getView());
+            }
+            myItem.focus();
         }else {}
     }
     catch (e) {
@@ -310,6 +317,21 @@ List.prototype.moveItem = function(item) {
 
 /**
 * @public
+* Insert new item after item given into parameter
+* @param {object} item used as reference to insert new item after.
+*/
+List.prototype.insertItemAfter = function(item) {
+    try {
+        var self_ = this;
+        self_.addItem(document.getElementById(item.getId()));
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+* @public
 * Dispatch event received to the right method
 * @param {string} eventName
 * @param {object} data
@@ -322,7 +344,11 @@ List.prototype.dispatch = function(eventName, data) {
         }
         else if(eventName === 'removeItem'){
             self_.removeItem(data);
-        }else{}
+        }
+        else if(eventName === 'insertItemAfter'){
+            self_.insertItemAfter(data);
+        }
+        else{}
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);

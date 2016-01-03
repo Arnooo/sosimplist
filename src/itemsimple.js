@@ -58,12 +58,44 @@ ItemSimple.prototype.buildView = function() {
         if(self_.options_.edit){   
             inputText.contentEditable = true;
         }
+        inputText.id = 'sosimplist-item-text'+self_.id_;
         inputText.className = 'sosimplist-item-text sosimplist-editable';
         inputText.setAttribute('placeholder','write something');
         inputText.addEventListener(
             'keyup',
             function(event) { 
-                self_.text_ = this.innerHTML;
+                if(event.keyCode === 13 && self_.parent_){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    self_.parent_.dispatch('insertItemAfter', self_);
+                }
+                else{
+                    self_.text_ = this.innerHTML;
+                }
+            },
+            false
+        );
+        inputText.addEventListener(
+            'keydown',
+            function(event) { 
+                if(event.keyCode === 13){ 
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                else{
+                }
+            },
+            false
+        );
+         inputText.addEventListener(
+            'keypress',
+            function(event) { 
+                if(event.keyCode === 13){ 
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                else{
+                }
             },
             false
         );
@@ -156,6 +188,25 @@ ItemSimple.prototype.unserialize = function(str) {
     return this.checked_;
  };
 
+/**
+  * @public
+  */
+ ItemSimple.prototype.focus = function() {
+    try {    
+        var self_ = this;
+        var el = document.getElementById('sosimplist-item-text'+self_.id_);
+        var range = document.createRange();
+        var sel = window.getSelection();
+        range.setStart(el, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        el.focus();
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+ };
 
 /**
 * @private
