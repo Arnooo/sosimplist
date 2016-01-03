@@ -33,10 +33,10 @@ List.prototype.buildView = function() {
              self_.view_.id = self_.id_;
              self_.view_.className = 'sosimplist-list';
 
-             if(self_.options_.edit){
+             if (self_.options_.edit) {
                 self_.view_.draggable = true;
              }
-             else{
+             else {
                 self_.view_.className += ' sosimplist-edit-false';
              }
 
@@ -44,14 +44,14 @@ List.prototype.buildView = function() {
              inputTitle.id = 'sosimplist-title' + self_.id_;
              inputTitle.className = 'sosimplist-title sosimplist-editable';
              //enable eddition
-             if(self_.options_.edit){   
+             if (self_.options_.edit) {
                 inputTitle.contentEditable = true;
              }
-             else{
+             else {
                 inputTitle.className += ' sosimplist-edit-false';
              }
              inputTitle.type = 'text';
-             inputTitle.setAttribute('placeholder','Title');
+             inputTitle.setAttribute('placeholder', 'Title');
              inputTitle.addEventListener(
                  'keyup',
                  function() { self_.title_ = this.innerHTML;},
@@ -59,7 +59,10 @@ List.prototype.buildView = function() {
              );
              if (self_.title_ !== '') {
                 inputTitle.innerHTML = self_.title_;
-             }else {}
+             }
+             else {
+                //Do nothing
+             }
              self_.view_.appendChild(inputTitle);
 
              self_.itemContainer_ = document.createElement('div');
@@ -67,25 +70,28 @@ List.prototype.buildView = function() {
              self_.itemContainer_.addEventListener(
                  'dragstart',
                  function(event) {
-                    if(event.target.classList.contains('sosimplist-item')){
+                    if (event.target.classList.contains('sosimplist-item')) {
                         var parentToDrag = event.target.closest('.sosimplist-item');
                         parentToDrag.style.zIndex = 1;
                         parentToDrag.style.boxShadow = '3px 3px 3px grey';
                         self_.dragData = {
-                            elementId:parentToDrag.id,
-                            source:'item'
+                            elementId: parentToDrag.id,
+                            source: 'item'
                         };
-                       
+
                         var mask = document.createElement('div');
                         mask.id = 'mask';
-                        mask.style.backgroundColor = 'red'; //To check if opacity is working 
+                        mask.style.backgroundColor = 'red'; //To check if opacity is working
                         mask.style.opacity = 0; // Should be not visible with opacity = 0
                         mask.style.width = parentToDrag.clientWidth;
                         mask.style.height = parentToDrag.clientHeight;
                         mask.style.cursor = 'move';
                         document.body.appendChild(mask);
                         event.dataTransfer.setDragImage(mask, 0, 0);
-                    }else{}
+                    }
+                    else {
+                        //Do nothing
+                    }
                  },
                  false
              );
@@ -94,33 +100,48 @@ List.prototype.buildView = function() {
                  function(event) {
                     event.preventDefault();
 
-                    if(self_.dragData && self_.dragData.source === 'item'){
+                    if (self_.dragData && self_.dragData.source === 'item') {
                         var elementDragged = document.getElementById(self_.dragData.elementId);
-                        if(elementDragged){
+                        if (elementDragged) {
                             var parentTarget = event.target.closest('.sosimplist-item');
                             var isContainInThisList = parentTarget.parentNode.contains(elementDragged);
-                            if(isContainInThisList){
+                            if (isContainInThisList) {
                                 elementDragged.nextSibling === parentTarget ?
                                 elementDragged.parentNode.insertBefore(elementDragged, parentTarget.nextSibling) :
                                 elementDragged.parentNode.insertBefore(elementDragged, parentTarget);
-                            }else{}
-                        }else{}
-                    }else{}
+                            }
+                            else {
+                                //Do nothing
+                            }
+                        }
+                        else {
+                            //Do nothing
+                        }
+                    }
+                    else {
+                        //Do nothing
+                    }
                  },
                  false
              );
              self_.itemContainer_.addEventListener(
                 'drop',
                 function(event) {
-                    if(self_.dragData && self_.dragData.source === 'item'){
+                    if (self_.dragData && self_.dragData.source === 'item') {
                         var elementDragged = document.getElementById(self_.dragData.elementId);
-                        if(elementDragged){
+                        if (elementDragged) {
                             document.body.removeChild(document.getElementById('mask'));
                             elementDragged.style.boxShadow = '';
                             elementDragged.style.zIndex = '0';
                             self_.dragData = null;
-                        }else{}
-                    }else{}
+                        }
+                        else {
+                            //Do nothing
+                        }
+                    }
+                    else {
+                        //Do nothing
+                    }
                 },
                 false
              );
@@ -133,7 +154,7 @@ List.prototype.buildView = function() {
              );
              self_.view_.appendChild(self_.itemContainer_);
 
-             if(self_.options_.edit){
+             if (self_.options_.edit) {
                  var buttonAddItem = document.createElement('input');
                  buttonAddItem.id = 'sosimplist-button-add-item';
                  buttonAddItem.className = 'sosimplist-button';
@@ -145,7 +166,10 @@ List.prototype.buildView = function() {
                      false
                  );
                  self_.view_.appendChild(buttonAddItem);
-             }else{}
+             }
+             else {
+                //Do nothing
+             }
 
 
              var dropdownList = document.createElement('div');
@@ -210,8 +234,8 @@ List.prototype.serialize = function() {
         for (var i = 0; i < self_.itemContainer_.children.length; i++) {
             content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainer_.children[i].id].serialize());
         }
-        for (var i = 0; i < self_.itemContainerChecked_.children.length; i++) {
-            content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainerChecked_.children[i].id].serialize());
+        for (var j = 0; j < self_.itemContainerChecked_.children.length; j++) {
+            content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
         }
         return JSON.stringify(content);
     }
@@ -263,10 +287,10 @@ List.prototype.addItem = function(itemElementCurrent) {
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
-            if(itemElementCurrent){
+            if (itemElementCurrent) {
                 self_.itemContainer_.insertBefore(myItem.getView(), itemElementCurrent.nextSibling);
             }
-            else{
+            else {
                 self_.itemContainer_.appendChild(myItem.getView());
             }
             myItem.focus();
@@ -285,10 +309,10 @@ List.prototype.addItem = function(itemElementCurrent) {
 List.prototype.removeItem = function(item) {
     try {
         var self_ = this;
-        if(self_.itemContainer_.contains(document.getElementById(item.getId()))){
+        if (self_.itemContainer_.contains(document.getElementById(item.getId()))) {
             self_.itemContainer_.removeChild(document.getElementById(item.getId()));
         }
-        else{
+        else {
             self_.itemContainerChecked_.removeChild(document.getElementById(item.getId()));
         }
         self_.mapOfItem_[item.getId()] = undefined;
@@ -345,16 +369,18 @@ List.prototype.insertItemAfter = function(item) {
 List.prototype.dispatch = function(eventName, data) {
     try {
         var self_ = this;
-        if(eventName === 'moveItem'){
+        if (eventName === 'moveItem') {
             self_.moveItem(data);
         }
-        else if(eventName === 'removeItem'){
+        else if (eventName === 'removeItem') {
             self_.removeItem(data);
         }
-        else if(eventName === 'insertItemAfter'){
+        else if (eventName === 'insertItemAfter') {
             self_.insertItemAfter(data);
         }
-        else{}
+        else {
+            //Do nothing
+        }
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
