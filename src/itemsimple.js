@@ -29,11 +29,14 @@ ItemSimple.prototype.buildView = function() {
         self_.view_.id = self_.id_;
         self_.view_.className = 'sosimplist-item';
 
-        if(self_.options_.edit){
+        if (self_.options_.edit) {
             var divSelector = document.createElement('div');
             divSelector.className = 'sosimplist-item-selector';
             self_.view_.appendChild(divSelector);
-        }else{}
+        }
+        else {
+            //Do nothing
+        }
 
         var inputCheckbox = document.createElement('input');
         inputCheckbox.className = 'sosimplist-item-checkbox';
@@ -43,10 +46,13 @@ ItemSimple.prototype.buildView = function() {
             function() {
                 self_.check_(this.checked);
 
-                if(self_.parent_){
+                if (self_.parent_) {
                     //move item to the right container
                     self_.parent_.dispatch('moveItem', self_);
-                }else{}
+                }
+                else {
+                    //Do nothing
+                }
             },
             false
         );
@@ -54,25 +60,25 @@ ItemSimple.prototype.buildView = function() {
         self_.view_.appendChild(inputCheckbox);
 
         var inputText = document.createElement('div');
-        inputText.id = 'sosimplist-item-text'+self_.id_;
+        inputText.id = 'sosimplist-item-text' + self_.id_;
         inputText.className = 'sosimplist-item-text sosimplist-editable';
         //enable eddition
-        if(self_.options_.edit){   
+        if (self_.options_.edit) {
             inputText.contentEditable = true;
         }
-        else{
+        else {
             inputText.className += ' sosimplist-edit-false';
         }
-        inputText.setAttribute('placeholder','write something');
+        inputText.setAttribute('placeholder', 'write something');
         inputText.addEventListener(
             'keyup',
-            function(event) { 
-                if(event.keyCode === 13 && self_.parent_){
+            function(event) {
+                if (event.keyCode === 13 && self_.parent_) {
                     event.preventDefault();
                     event.stopPropagation();
                     self_.parent_.dispatch('insertItemAfter', self_);
                 }
-                else{
+                else {
                     self_.text_ = this.innerHTML;
                 }
             },
@@ -80,24 +86,26 @@ ItemSimple.prototype.buildView = function() {
         );
         inputText.addEventListener(
             'keydown',
-            function(event) { 
-                if(event.keyCode === 13){ 
+            function(event) {
+                if (event.keyCode === 13) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
-                else{
+                else {
+                    //Do nothing
                 }
             },
             false
         );
          inputText.addEventListener(
             'keypress',
-            function(event) { 
-                if(event.keyCode === 13){ 
+            function(event) {
+                if (event.keyCode === 13) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
-                else{
+                else {
+                    //Do nothing
                 }
             },
             false
@@ -107,20 +115,26 @@ ItemSimple.prototype.buildView = function() {
         }else {}
         self_.view_.appendChild(inputText);
 
-        if(self_.options_.edit){    
+        if (self_.options_.edit) {
             var divDelete = document.createElement('div');
             divDelete.className = 'sosimplist-item-delete';
             divDelete.addEventListener(
                 'click',
-                function() { 
-                    if(self_.parent_){
+                function() {
+                    if (self_.parent_) {
                         self_.parent_.dispatch('removeItem', self_);
-                    }else{}
+                    }
+                    else {
+                        //Do nothing
+                    }
                 },
                 false
             );
             self_.view_.appendChild(divDelete);
-        }else{}
+        }
+        else {
+            //Do nothing
+        }
 
         //Customize view depending on private members
         self_.check_(self_.checked_);
@@ -151,7 +165,7 @@ ItemSimple.prototype.serialize = function() {
 ItemSimple.prototype.unserialize = function(str) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
-        if(str) {
+        if (str) {
             var self_ = this;
             var content = JSON.parse(str);
             self_.id_ = content.id_;
@@ -159,7 +173,7 @@ ItemSimple.prototype.unserialize = function(str) {
             self_.text_ = content.text_;
         }
         else {
-            throw new Error("Input str = "+str+", does not contain data to unserialize!");
+            throw new Error('Input str = ' + str + ', does not contain data to unserialize!');
         }
     }
     catch (e) {
@@ -195,9 +209,9 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   */
  ItemSimple.prototype.focus = function() {
-    try {    
+    try {
         var self_ = this;
-        var el = document.getElementById('sosimplist-item-text'+self_.id_);
+        var el = document.getElementById('sosimplist-item-text' + self_.id_);
         var range = document.createRange();
         var sel = window.getSelection();
         range.setStart(el, 0);
@@ -221,14 +235,14 @@ ItemSimple.prototype.check_ = function(check) {
 
         var self_ = this;
 
-        if(check === true || check === false){
+        if (check === true || check === false) {
             self_.checked_ = check;
 
-            if(self_.options_.edit){
+            if (self_.options_.edit) {
                 //hide/show selector
-                if(self_.view_ &&
+                if (self_.view_ &&
                    self_.view_.getElementsByClassName('sosimplist-item-selector') &&
-                   self_.view_.getElementsByClassName('sosimplist-item-selector')[0]){
+                   self_.view_.getElementsByClassName('sosimplist-item-selector')[0]) {
 
                     //Enable/disable dragndrop
                     self_.view_.draggable = !self_.checked_;
@@ -241,12 +255,12 @@ ItemSimple.prototype.check_ = function(check) {
                     }
                 }
                 else {
-                    throw new Error("The view = "+self_.view_+" is not initialized correctly!");
+                    throw new Error('The view = ' + self_.view_ + ' is not initialized correctly!');
                 }
             }
         }
-        else{
-            throw new Error("check = "+check+", cannot set this value!");
+        else {
+            throw new Error('check = ' + check + ', cannot set this value!');
         }
     }
     catch (e) {

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@ function DEBUGCheckNoArgument(inArguments) {
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 function DEBUGCheckArgumentsAreValids(inArguments, inNbArgument) {
-    console.assert(inArguments.length === inNbArgument, "Set " + inArguments.length + " arguments in place of " + inNbArgument);
+    console.assert(inArguments.length === inNbArgument, 'Set ' + inArguments.length + ' arguments in place of ' + inNbArgument);
 
     DEBUGCheckFirstArgumentsAreValids(inArguments, inNbArgument);
 }
@@ -21,9 +21,9 @@ function DEBUGCheckFirstArgumentsAreValids(inArguments, inNbArgument) {
         var arg = inArguments[i];
         var type = typeof arg;
 
-        console.assert(type !== 'undefined', "Argument " + i + " is undefined");
-        console.assert(!(type === 'number' && isNaN(arg)), "Argument " + i + " is undefined");
-        console.assert(!(type === 'object' && arg == null), "Argument " + i + " is null");
+        console.assert(type !== 'undefined', 'Argument ' + i + ' is undefined');
+        console.assert(!(type === 'number' && isNaN(arg)), 'Argument ' + i + ' is undefined');
+        console.assert(!(type === 'object' && arg === null), 'Argument ' + i + ' is null');
     }
 }
 
@@ -34,5 +34,5 @@ function DEBUGAssertValue(inValue) { // tddo rename me
 
     console.assert(type !== 'undefined');
     console.assert(!(type === 'number' && isNaN(inValue)));
-    console.assert(!(type === 'object' && inValue == null));
+    console.assert(!(type === 'object' && inValue === null));
 }
