@@ -1,0 +1,25 @@
+{
+  "name": "sosimplist",
+  "homepage": "https://github.com/Arnooo/sosimplist",
+  "description": "A simple list library in javascript. No dependencies, except in developement because of unit testing.",
+  "main": "src/sosimplist.js",
+  "moduleType": [],
+  "keywords": [
+    "list",
+    "javascript"
+  ],
+  "authors": [
+    "Arnaud Joubel"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "test"
+  ],
+  "devDependencies": {
+    "jquery": "~2.1.4",
+    "jasmine-jquery": "~2.1.1",
+    "blanket": "~1.1.7"
+  }
+}

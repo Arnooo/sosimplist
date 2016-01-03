@@ -5,24 +5,21 @@
  /**
   * @public
   * @constructor
+  * @param {object} options is used to configure the list
   */
- function List() {
-     try {
-         var self_ = this;
-         self_.id_ = 'sosimplist-list' + (new Date().getTime());
-         self_.view_ = null;
-         self_.title_ = '';
-         self_.mapOfItem_ = {};
-         self_.checkedVisible_ = false;
-         self_.dropdownButtonVisible_ = false;
-         self_.dragData = null;
+ function List(options) {
+     var self_ = this;
+     self_.options_ = options;
+     self_.id_ = 'sosimplist-list' + (new Date().getTime());
+     self_.view_ = null;
+     self_.title_ = '';
+     self_.mapOfItem_ = {};
+     self_.checkedVisible_ = false;
+     self_.dropdownButtonVisible_ = false;
+     self_.dragData = null;
 
-         //add default item
-         self_.addItem();
-    }
-    catch (e) {
-        console.error(e.name + ': ' + e.message);
-    }
+     //add default item
+     self_.addItem();
  }
 
  /**
@@ -35,25 +32,32 @@ List.prototype.buildView = function() {
              self_.view_ = document.createElement('div');
              self_.view_.id = self_.id_;
              self_.view_.className = 'sosimplist-list';
-             self_.view_.draggable = true;
 
-             var inputTitle = document.createElement('input');
+             if(self_.options_.edit){
+                self_.view_.draggable = true;
+             }else{}
+
+             var inputTitle = document.createElement('div');
+             //enable eddition
+             if(self_.options_.edit){   
+                inputTitle.contentEditable = true;
+             }
              inputTitle.id = 'sosimplist-title' + self_.id_;
-             inputTitle.className = 'sosimplist-title';
+             inputTitle.className = 'sosimplist-title sosimplist-editable';
              inputTitle.type = 'text';
-             inputTitle.placeholder = 'Title';
+             inputTitle.setAttribute('placeholder','Title');
              inputTitle.addEventListener(
                  'keyup',
-                 function() { self_.title_ = this.value;},
+                 function() { self_.title_ = this.innerHTML;},
                  false
              );
              if (self_.title_ !== '') {
-                inputTitle.value = self_.title_;
+                inputTitle.innerHTML = self_.title_;
              }else {}
              self_.view_.appendChild(inputTitle);
 
              self_.itemContainer_ = document.createElement('div');
-             self_.itemContainer_.id = 'sosimplist-container-item';
+             self_.itemContainer_.className = 'sosimplist-container-item';
              self_.itemContainer_.addEventListener(
                  'dragstart',
                  function(event) {
@@ -123,22 +127,24 @@ List.prototype.buildView = function() {
              );
              self_.view_.appendChild(self_.itemContainer_);
 
-             var buttonAddItem = document.createElement('input');
-             buttonAddItem.className = 'sosimplist-button';
-             buttonAddItem.type = 'button';
-             buttonAddItem.value = 'Add item';
-             buttonAddItem.addEventListener(
-                 'click',
-                 function() { self_.addItem(); },
-                 false
-             );
-             self_.view_.appendChild(buttonAddItem);
+             if(self_.options_.edit){
+                 var buttonAddItem = document.createElement('input');
+                 buttonAddItem.id = 'sosimplist-button-add-item';
+                 buttonAddItem.className = 'sosimplist-button';
+                 buttonAddItem.type = 'button';
+                 buttonAddItem.value = 'Add item';
+                 buttonAddItem.addEventListener(
+                     'click',
+                     function() { self_.addItem(); },
+                     false
+                 );
+                 self_.view_.appendChild(buttonAddItem);
+             }else{}
 
 
              var dropdownList = document.createElement('div');
              dropdownList.className = 'sosimplist-list-dropdown-checked';
              dropdownList.value = 'click';
-
              dropdownList.addEventListener(
                  'click',
                  function() {
@@ -175,7 +181,7 @@ List.prototype.buildView = function() {
              self_.setVisibility_();
          }
          else {
-            console.log('List ID = ' + self_.id_ + ', View already builded !');
+            console.error('List ID = ' + self_.id_ + ', View already builded !');
          }
     }
     catch (e) {
@@ -201,7 +207,7 @@ List.prototype.serialize = function() {
         for (var i = 0; i < self_.itemContainerChecked_.children.length; i++) {
             content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainerChecked_.children[i].id].serialize());
         }
-        return btoa(JSON.stringify(content));
+        return JSON.stringify(content);
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -215,12 +221,12 @@ List.prototype.serialize = function() {
 List.prototype.unserialize = function(str) {
     try {
         var self_ = this;
-        var content = JSON.parse(atob(str));
+        var content = JSON.parse(str);
         self_.id_ = content.id_;
         self_.title_ = content.title_;
         self_.mapOfItem_ = {};
         for (var i = 0; i < content.arrayOfItem_.length; i++) {
-            var myItem = new ItemSimple(self_);
+            var myItem = new ItemSimple(self_, self_.options_);
             myItem.unserialize(content.arrayOfItem_[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
@@ -235,22 +241,29 @@ List.prototype.unserialize = function(str) {
 * @public
 * @return {string} return list id
 */
-List.prototype.getListId = function() {
+List.prototype.getId = function() {
     return this.id_;
 };
 
 /**
 * @public
 * Add item to this list
+* @param {object} itemElementCurrent used as index to create the new item element.
 */
-List.prototype.addItem = function() {
+List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = new ItemSimple(self_);
+        var myItem = new ItemSimple(self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
-            self_.itemContainer_.appendChild(myItem.getView());
+            if(itemElementCurrent){
+                self_.itemContainer_.insertBefore(myItem.getView(), itemElementCurrent.nextSibling);
+            }
+            else{
+                self_.itemContainer_.appendChild(myItem.getView());
+            }
+            myItem.focus();
         }else {}
     }
     catch (e) {
@@ -266,13 +279,14 @@ List.prototype.addItem = function() {
 List.prototype.removeItem = function(item) {
     try {
         var self_ = this;
-        self_.mapOfItem_[item.getId()] = undefined;
         if(self_.itemContainer_.contains(document.getElementById(item.getId()))){
             self_.itemContainer_.removeChild(document.getElementById(item.getId()));
         }
         else{
             self_.itemContainerChecked_.removeChild(document.getElementById(item.getId()));
         }
+        self_.mapOfItem_[item.getId()] = undefined;
+        delete self_.mapOfItem_[item.getId()];
         self_.setVisibility_();
     }
     catch (e) {
@@ -295,6 +309,46 @@ List.prototype.moveItem = function(item) {
             self_.itemContainer_.appendChild(document.getElementById(item.getId()));
         }
         self_.setVisibility_();
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+* @public
+* Insert new item after item given into parameter
+* @param {object} item used as reference to insert new item after.
+*/
+List.prototype.insertItemAfter = function(item) {
+    try {
+        var self_ = this;
+        self_.addItem(document.getElementById(item.getId()));
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+* @public
+* Dispatch event received to the right method
+* @param {string} eventName
+* @param {object} data
+*/
+List.prototype.dispatch = function(eventName, data) {
+    try {
+        var self_ = this;
+        if(eventName === 'moveItem'){
+            self_.moveItem(data);
+        }
+        else if(eventName === 'removeItem'){
+            self_.removeItem(data);
+        }
+        else if(eventName === 'insertItemAfter'){
+            self_.insertItemAfter(data);
+        }
+        else{}
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
