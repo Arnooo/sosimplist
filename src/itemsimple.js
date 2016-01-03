@@ -54,12 +54,15 @@ ItemSimple.prototype.buildView = function() {
         self_.view_.appendChild(inputCheckbox);
 
         var inputText = document.createElement('div');
+        inputText.id = 'sosimplist-item-text'+self_.id_;
+        inputText.className = 'sosimplist-item-text sosimplist-editable';
         //enable eddition
         if(self_.options_.edit){   
             inputText.contentEditable = true;
         }
-        inputText.id = 'sosimplist-item-text'+self_.id_;
-        inputText.className = 'sosimplist-item-text sosimplist-editable';
+        else{
+            inputText.className += ' sosimplist-edit-false';
+        }
         inputText.setAttribute('placeholder','write something');
         inputText.addEventListener(
             'keyup',

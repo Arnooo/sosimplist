@@ -4,14 +4,13 @@
     cursor: text;
 }
 
-.sosimplist {
-    width: 100%;
-    text-align: center;
-    vertical-align: middle;
+.sosimplist-edit-false {
+    cursor: default !important;
 }
 
-.sosimplist input {
-    border : 0px;
+.sosimplist {
+    text-align: center;
+    vertical-align: middle;
 }
 
 .sosimplist-button:hover {
@@ -19,12 +18,14 @@
 }
 
 .sosimplist-container-list {
+    max-width: 97%;
     margin: 3%;
     text-align: center;
     vertical-align: middle;
 }
 
 .sosimplist-list {
+    max-width: inherit;
     display: inline-block;
     text-align: left;
     vertical-align: top;
@@ -41,7 +42,6 @@
 }
 
 .sosimplist-title {
-    max-width:200px;
     font-size: 14px;
     font-weight: bold;
     cursor: text;
@@ -86,7 +86,7 @@
 
 .sosimplist-item-text {
     display: inline-block;
-    width: 140px;
+    min-width: 140px;
     font-size: 14px;
     margin: 3px;
     cursor:text;
@@ -99,6 +99,7 @@
     display: inline-block;
     vertical-align: top;
     margin-top: 6px;
+    float: right;
 }
 
 .sosimplist-item-selector:hover {
