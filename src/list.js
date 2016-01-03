@@ -35,15 +35,21 @@ List.prototype.buildView = function() {
 
              if(self_.options_.edit){
                 self_.view_.draggable = true;
-             }else{}
+             }
+             else{
+                self_.view_.className += ' sosimplist-edit-false';
+             }
 
              var inputTitle = document.createElement('div');
+             inputTitle.id = 'sosimplist-title' + self_.id_;
+             inputTitle.className = 'sosimplist-title sosimplist-editable';
              //enable eddition
              if(self_.options_.edit){   
                 inputTitle.contentEditable = true;
              }
-             inputTitle.id = 'sosimplist-title' + self_.id_;
-             inputTitle.className = 'sosimplist-title sosimplist-editable';
+             else{
+                inputTitle.className += ' sosimplist-edit-false';
+             }
              inputTitle.type = 'text';
              inputTitle.setAttribute('placeholder','Title');
              inputTitle.addEventListener(
