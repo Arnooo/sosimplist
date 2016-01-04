@@ -18,6 +18,36 @@ module.exports = function(grunt) {
                 dest: 'dist/<%= pkg.name %>.min.js'
             }
         },
+        karma: {
+            unit: {
+                options: {
+                    files: [
+                     'bower_components/jquery/dist/jquery.min.js',
+                     'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
+                     'bower_components/jquery-simulate/jquery.simulate.js',
+                     'src/*.js', 
+                     'test/spec/*.js'],
+                     reporters: ['progress', 'coverage'],
+                     preprocessors: {
+                        'src/*.js': ['coverage']
+                     },
+                     coverageReporter: {
+                        dir : 'test/coverage/',
+                        reporters: [
+                            { type: 'html', subdir: 'report-html' },
+                            { type: 'lcov', subdir: 'report-lcov' },
+                        ]
+                     },
+                     frameworks: ['jasmine'],
+                     singleRun: true
+                }
+            }
+        },
+        coveralls: {            
+            options: {
+                coverageDir: 'test/coverage/'
+            }
+        },
         serve: {
             options: {
                 port: 8000
@@ -27,10 +57,13 @@ module.exports = function(grunt) {
     
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-karma-coveralls');
     grunt.loadNpmTasks('grunt-serve');
     
     // task(s).
-    grunt.registerTask('serve', ['serve']);
+    grunt.registerTask('dev', ['serve']);
+    grunt.registerTask('test', ['karma']);
     grunt.registerTask('default', ['concat', 'uglify']);
     
 };
