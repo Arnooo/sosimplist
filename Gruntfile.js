@@ -21,6 +21,7 @@ module.exports = function(grunt) {
         karma: {
             unit: {
                 options: {
+                    browsers: ['Chrome'],
                     files: [
                      'bower_components/jquery/dist/jquery.min.js',
                      'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
