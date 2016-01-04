@@ -1,6 +1,7 @@
 # - Sosimplist -
 <a href="https://codeclimate.com/github/Arnooo/sosimplist"><img src="https://codeclimate.com/github/Arnooo/sosimplist/badges/gpa.svg" /></a>
 [![Build Status](https://semaphoreci.com/api/v1/projects/2b18da5b-6a83-4ff8-a7ca-083ff920664f/649186/badge.svg)](https://semaphoreci.com/arnooo/sosimplist)
+[![Coverage Status](https://coveralls.io/repos/Arnooo/sosimplist/badge.svg?branch=master&service=github)](https://coveralls.io/github/Arnooo/sosimplist?branch=master)
 
 A simple list library in Javascript. **No dependencies**
 
