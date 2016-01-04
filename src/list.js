@@ -54,9 +54,43 @@ List.prototype.buildView = function() {
              inputTitle.setAttribute('placeholder', 'Title');
              inputTitle.addEventListener(
                  'keyup',
-                 function() { self_.title_ = this.innerHTML;},
+                 function() { 
+                     if (event.keyCode === 13) {
+                         event.preventDefault();
+                         event.stopPropagation();
+                     }
+                     else {
+                        self_.title_ = this.innerHTML;
+                     }
+                 },
                  false
              );
+             inputTitle.addEventListener(
+                'keydown',
+                function(event) {
+                    if (event.keyCode === 13) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    else {
+                        //Do nothing
+                    }
+                },
+                false
+            );
+             inputTitle.addEventListener(
+                'keypress',
+                function(event) {
+                    if (event.keyCode === 13) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    else {
+                        //Do nothing
+                    }
+                },
+                false
+            );
              if (self_.title_ !== '') {
                 inputTitle.innerHTML = self_.title_;
              }
