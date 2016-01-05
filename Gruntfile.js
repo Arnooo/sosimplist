@@ -42,6 +42,19 @@ module.exports = function(grunt) {
                 dest: 'dist/<%= pkg.name %>.min.js'
             }
         },
+        "regex-replace": {
+            build: {
+                src: ['src/*.js'],
+                actions: [
+                    {
+                        name: 'DEBUG',
+                        search: '(^|\\s)DEBUG',
+                        replace: '//DEBUG',
+                        flags: 'g'
+                    }
+                ]
+            }
+        },
         karma: {
             options: {
                 port: 9999,
@@ -83,6 +96,7 @@ module.exports = function(grunt) {
     //build
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-regex-replace');
     
     //serve, open and watch
     grunt.loadNpmTasks('grunt-contrib-connect');
@@ -94,7 +108,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma-coveralls');
     
     // task(s).
-    grunt.registerTask('build', ['concat', 'uglify']);
+    grunt.registerTask('build', ['regex-replace', 'concat', 'uglify']);
     grunt.registerTask('semaphore', ['build', 'karma:semaphore', 'coveralls']);
     grunt.registerTask('dev', ['build', 'karma:dev', 'connect:server', 'open:server', 'open:test', 'watch']);
     grunt.registerTask('default', ['build']);
