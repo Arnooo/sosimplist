@@ -3,6 +3,30 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        connect: {
+            server: {
+                options: {
+                    port: 9001,
+                    base: '.'
+                }
+            }
+        },
+        open : {
+            server : {
+                path: 'http://localhost:9001',
+                app: 'google-chrome'
+            },
+            test : {
+                path: 'http://localhost:9001/test/coverage/report-html/',
+                app: 'google-chrome'
+            }
+        },
+        watch: {
+            scripts: {
+                files: ['src/*.js'],
+                tasks: ['build']
+            },
+        },
         concat: {
             dist: {
                 src: ['src/itemsimple.js', 'src/list.js', 'src/sosimplist.js'],
@@ -19,52 +43,60 @@ module.exports = function(grunt) {
             }
         },
         karma: {
-            unit: {
-                options: {
-                    browsers: ['Chrome'],
-                    files: [
-                     'bower_components/jquery/dist/jquery.min.js',
-                     'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
-                     'bower_components/jquery-simulate/jquery.simulate.js',
-                     'src/*.js', 
-                     'test/spec/*.js'],
-                     reporters: ['progress', 'coverage'],
-                     preprocessors: {
-                        'src/*.js': ['coverage']
-                     },
-                     coverageReporter: {
-                        dir : 'test/coverage/',
-                        reporters: [
-                            { type: 'html', subdir: 'report-html' },
-                            { type: 'lcov', subdir: 'report-lcov' },
-                        ]
-                     },
-                     frameworks: ['jasmine'],
-                     singleRun: true
-                }
+            options: {
+                port: 9999,
+                browsers: ['Chrome'],
+                files: [
+                'bower_components/jquery/dist/jquery.min.js',
+                'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
+                'bower_components/jquery-simulate/jquery.simulate.js',
+                'src/*.js', 
+                'test/spec/*.js'],
+                reporters: ['progress', 'coverage'],
+                preprocessors: {
+                    'src/*.js': ['coverage']
+                },
+                coverageReporter: {
+                    dir : 'test/coverage/',
+                     reporters: [
+                     { type: 'html', subdir: 'report-html' },
+                     { type: 'lcov', subdir: 'report-lcov' },
+                     ]
+                },
+                frameworks: ['jasmine']
+            },
+            semaphore: {
+                singleRun: true
+            },
+            dev: {
+                background: true,
+                singleRun: false
             }
         },
         coveralls: {            
             options: {
                 coverageDir: 'test/coverage/'
             }
-        },
-        serve: {
-            options: {
-                port: 8000
-            }
         }
     });
     
+    //build
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    
+    //serve, open and watch
+    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-open');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    
+    //test and test coverage
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-karma-coveralls');
-    grunt.loadNpmTasks('grunt-serve');
     
     // task(s).
-    grunt.registerTask('dev', ['serve']);
-    grunt.registerTask('test', ['karma']);
-    grunt.registerTask('default', ['concat', 'uglify']);
+    grunt.registerTask('build', ['concat', 'uglify']);
+    grunt.registerTask('semaphore', ['build', 'karma:semaphore', 'coveralls']);
+    grunt.registerTask('dev', ['build', 'karma:dev', 'connect:server', 'open:server', 'open:test', 'watch']);
+    grunt.registerTask('default', ['build']);
     
 };
