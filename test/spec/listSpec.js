@@ -28,8 +28,12 @@ describe("List", function() {
   });
 
   describe("when view is builded", function() {
-    beforeEach(function() {
+      beforeEach(function(done) {
       list.buildView();
+      //wait 5ms to not have same timestamp on add item or others calls
+      setTimeout(function(){
+        done();
+      }, 5);
       setFixtures(list.getView());
     });
 
@@ -87,16 +91,20 @@ describe("List", function() {
     }); 
 
     describe("when add item button is clicked", function() {
-      beforeEach(function() {
-        $('#sosimplist-button-add-item').trigger('click');
+       beforeEach(function() {
+           $('#sosimplist-button-add-item').trigger('click');
       });
 
-      it("should add an item to the list", function() {
+      it("should add an item to the map of item", function() {
         var count = 0;
         for (var itemId in list.mapOfItem_) {
             count++;
         }
         expect(count).toEqual(2);
+      });
+      
+      it("should add an item to the view", function() {
+          expect($('.sosimplist-container-item')[0].children.length).toEqual(2);
       });
     });
 
