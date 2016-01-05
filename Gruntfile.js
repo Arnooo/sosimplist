@@ -52,7 +52,7 @@ module.exports = function(grunt) {
                 'bower_components/jquery-simulate/jquery.simulate.js',
                 'src/*.js', 
                 'test/spec/*.js'],
-                reporters: ['progress', 'coverage'],
+                reporters: ['progress', 'html', 'coverage'],
                 preprocessors: {
                     'src/*.js': ['coverage']
                 },

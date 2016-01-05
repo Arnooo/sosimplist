@@ -26,6 +26,7 @@
     "karma-coverage": "~0.5.3",
     "karma-jasmine": "~0.3.6",
     "grunt-contrib-watch": "~0.6.1",
-    "grunt-contrib-connect": "~0.11.2"
+    "grunt-contrib-connect": "~0.11.2",
+    "karma-jasmine-html-reporter": "~0.1.8"
   }
 }
