@@ -173,33 +173,33 @@ describe("List", function() {
     });
 
     describe("when list is serialized", function() {
-      it("should return a JSON object which contains the main data", function() {
+      it("should return an object which contains the main data", function() {
         var data = list.serialize();
         var shouldBeData = {
-            id_: list.id_,
-            title_: list.title_,
-            arrayOfItem_: []
+            title: list.title_,
+            items: []
         };   
         for (var itemId in list.mapOfItem_) {
-            shouldBeData.arrayOfItem_.push(list.mapOfItem_[itemId].serialize());
+            shouldBeData.items.push(list.mapOfItem_[itemId].serialize());
         }
-        expect(data).toEqual(JSON.stringify(shouldBeData));
+        expect(data).toEqual(shouldBeData);
       });
     });
 
     describe("when list is unserialized", function() {
       it("should extract data and initialize the list", function() {    
         var inputData = {
-            id_: list.id_,
-            title_: list.title_,
-            arrayOfItem_: []
+            title: list.title_,
+            items: []
         };   
+        var count = 0;
         for (var itemId in list.mapOfItem_) {
-            inputData.arrayOfItem_.push(list.mapOfItem_[itemId].serialize());
+            inputData.items.push(list.mapOfItem_[itemId].serialize());
+            count ++;
         }
-        list.unserialize(JSON.stringify(inputData));
-        expect(list.getId()).toEqual(inputData.id_);
-        expect(list.title_).toEqual(inputData.title_);
+        list.unserialize(inputData);
+        expect(list.title_).toEqual(inputData.title);
+        expect(count).toEqual(inputData.items.length);
       });
 
       it("should fail when we do not send data to extract in parameter", function() { 
@@ -211,14 +211,13 @@ describe("List", function() {
     describe("when data are unserialized and view is build", function() {
         beforeEach(function() {
             var inputData = {
-                id_: 1234,
-                title_: 'Title Test',
-                arrayOfItem_: []
+                title: 'Title Test',
+                items: []
             };    
             for (var itemId in list.mapOfItem_) {
-                inputData.arrayOfItem_.push(list.mapOfItem_[itemId].serialize());
+                inputData.items.push(list.mapOfItem_[itemId].serialize());
             }
-            list.unserialize(JSON.stringify(inputData));
+            list.unserialize(inputData);
             list.buildView();
             setFixtures(list.getView());
         });
@@ -226,9 +225,6 @@ describe("List", function() {
         it("should initialize the Title", function() {
           expect(list.title_).toEqual('Title Test');
           expect($('.sosimplist-title')[0].innerHTML).toEqual('Title Test');
-        });
-        it("should initialize the id", function() {
-          expect(list.getId()).toEqual(1234);
         });
     });
 });

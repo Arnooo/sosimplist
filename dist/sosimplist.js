@@ -151,9 +151,8 @@ ItemSimple.prototype.buildView = function() {
 ItemSimple.prototype.serialize = function() {
     var self_ = this;
     var content = {
-        id_: self_.id_,
-        checked_: self_.checked_,
-        text_: self_.text_
+        checked: self_.checked_,
+        text: self_.text_
     };
     return JSON.stringify(content);
 };
@@ -168,9 +167,8 @@ ItemSimple.prototype.unserialize = function(str) {
         if (str) {
             var self_ = this;
             var content = JSON.parse(str);
-            self_.id_ = content.id_;
-            self_.checked_ = content.checked_;
-            self_.text_ = content.text_;
+            self_.checked_ = content.checked;
+            self_.text_ = content.text;
         }
         else {
             throw new Error('Input str = ' + str + ', does not contain data to unserialize!');
@@ -531,15 +529,14 @@ List.prototype.serialize = function() {
     try {
         var self_ = this;
         var content = {
-            id_: self_.id_,
-            title_: self_.title_,
-            arrayOfItem_: [] // parse element array to save item order
+            title: self_.title_,
+            items: [] // parse element array to save item order
         };
         for (var i = 0; i < self_.itemContainer_.children.length; i++) {
-            content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainer_.children[i].id].serialize());
+            content.items.push(self_.mapOfItem_[self_.itemContainer_.children[i].id].serialize());
         }
         for (var j = 0; j < self_.itemContainerChecked_.children.length; j++) {
-            content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
+            content.items.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
         }
         return JSON.stringify(content);
     }
@@ -556,12 +553,11 @@ List.prototype.unserialize = function(str) {
     try {
         var self_ = this;
         var content = JSON.parse(str);
-        self_.id_ = content.id_;
-        self_.title_ = content.title_;
+        self_.title_ = content.title;
         self_.mapOfItem_ = {};
-        for (var i = 0; i < content.arrayOfItem_.length; i++) {
+        for (var i = 0; i < content.items.length; i++) {
             var myItem = new ItemSimple(self_, self_.options_);
-            myItem.unserialize(content.arrayOfItem_[i]);
+            myItem.unserialize(content.items[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
         }
@@ -755,6 +751,7 @@ function Sosimplist() {
     self_.view_ = null;
     self_.mapOfList_ = {};
     self_.options_ = {
+        data: [],
         save: E_SAVE_IN.URL,
         edit: true, // edit / remove / add
         checkable: true  // can check list item or not
@@ -784,14 +781,21 @@ Sosimplist.prototype.init = function(viewId, options) {
                 }
             }
 
-            //load data from URI
+            // load data 
+            var dataToUnserialize = null;
             var hrefArray = window.location.href.split('#');
-            if (hrefArray[1]) {
-                self_.unserialize(hrefArray[1]);
+            // Try with init input parameters
+            if(self_.options_.data){
+                dataToUnserialize = self_.options_.data;
             }
-            else {
+            // Try with URI
+            else if(hrefArray[1]){
+                dataToUnserialize = atob(hrefArray[1]);
+            }
+            else{
                 //Do nothing
             }
+            self_.unserialize(dataToUnserialize);
 
             /// @TODO clear all elment in the view before adding ours
             //self_.view_
@@ -958,36 +962,40 @@ Sosimplist.prototype.init = function(viewId, options) {
 
 /**
  * @public
- * @return {string} return content serialize in a base64 string
+ * @return {string} return content serialize in a JSON object
  */
 Sosimplist.prototype.serialize = function() {
     var self_ = this;
-    var content = {
-        viewId_: self_.viewId_,
-        mapOfList_: {}
-    };
+    var content = [];
     for (var listId in self_.mapOfList_) {
-        content.mapOfList_[listId] = self_.mapOfList_[listId].serialize();
+        content.push(self_.mapOfList_[listId].serialize());
     }
 
-    return btoa(JSON.stringify(content));
+    return JSON.stringify(content);
 };
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {string} str content serialized in a JSON object
  */
 Sosimplist.prototype.unserialize = function(str) {
     try {
         var self_ = this;
-        var content = JSON.parse(atob(str));
-        self_.viewId_ = content.viewId_;
-        self_.mapOfList_ = {};
-        for (var listId in content.mapOfList_) {
-            var myList = new List(self_.options_);
-            myList.unserialize(content.mapOfList_[listId]);
-            myList.buildView();
-            self_.mapOfList_[listId] = myList;
+        if(str){
+            var content = JSON.parse(str);
+            self_.viewId_ = content.viewId_;
+            self_.mapOfList_ = {};
+            for (var i = 0; i < content.length; i++) {
+                var myList = new List(self_.options_);
+                myList.unserialize(content[i]);
+                myList.buildView();
+                self_.mapOfList_[myList.getId()] = myList;
+            }
+        } 
+        else
+        {
+            //Cannot unserialize null data, throw error
+            throw new Error('Cannot unserialize empty data'); 
         }
     }
     catch (e) {
@@ -1053,7 +1061,7 @@ Sosimplist.prototype.getId = function() {
 Sosimplist.prototype.updateLocation_ = function(viewId) {
     var self_ = this;
     if (E_SAVE_IN.URL === self_.options_.save) {
-        window.location.href = window.location.href.split('#')[0] + '#' + self_.serialize();
+        window.location.href = window.location.href.split('#')[0] + '#' + btoa(self_.serialize());
     }
     //console.log("Location changed !");
 };

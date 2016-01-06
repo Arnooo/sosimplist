@@ -28,7 +28,7 @@ describe("Sosimplist", function() {
 
     it("should initialized the view", function() {
 
-      expect(sosimplist.options_).toEqual({save:E_SAVE_IN.NONE, edit:true, checkable : true});
+      expect(sosimplist.options_).toEqual({data:[],save:E_SAVE_IN.NONE, edit:true, checkable : true});
 
       expect(sosimplist.getView()).not.toEqual(null);
       
@@ -77,29 +77,28 @@ describe("Sosimplist", function() {
     });
 
     describe("when sosimplist is serialized", function() {
-      it("should return a JSON object encoded in base64 which contains the main data", function() {
+      it("should return a JSON object encoded which contains the main data", function() {
         var data = sosimplist.serialize();
-        var shouldBeData = {
-            viewId_: sosimplist.viewId_,
-            mapOfList_: {}
-        };  
-        expect(data).toEqual(btoa(JSON.stringify(shouldBeData)));
+        var shouldBeData = [];
+        expect(data).toEqual(JSON.stringify(shouldBeData));
       });
     });
 
     describe("when sosimplist is unserialized", function() {
       it("should extract data and initialize the sosimplist object", function() {    
-        var inputData = {
-            viewId_: sosimplist.viewId_,
-            mapOfList_: {}
-        }; 
-        sosimplist.unserialize(btoa(JSON.stringify(inputData)));
-        expect(sosimplist.getId()).toEqual(inputData.viewId_);
+        var inputData = [];
+        sosimplist.unserialize(JSON.stringify(inputData));
+        expect(sosimplist.mapOfList_).toEqual({});
       });
 
-      it("should fail when we do not send data to extract in parameter", function() { 
-        sosimplist.unserialize();
+      it("should fail when we do send empty or corrupted data to extract in parameter", function() { 
+        sosimplist.unserialize({});
         expect(console.error).toHaveBeenCalled();
+      });
+      
+      it("should fail when we do not send data to extract in parameter", function() { 
+          sosimplist.unserialize();
+          expect(console.error).toHaveBeenCalled();
       });
     });
 
