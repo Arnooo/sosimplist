@@ -9,7 +9,7 @@
   * @param {object} options is used to configure the itemsimple
   */
  function ItemSimple(parent, options) {
-   //DEBUGCheckArgumentsAreValids(arguments, 2);
+    DEBUGCheckArgumentsAreValids(arguments, 2);
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -164,7 +164,7 @@ ItemSimple.prototype.serialize = function() {
  */
 ItemSimple.prototype.unserialize = function(str) {
     try {
-       //DEBUGCheckArgumentsAreValids(arguments, 1);
+        DEBUGCheckArgumentsAreValids(arguments, 1);
         if (str) {
             var self_ = this;
             var content = JSON.parse(str);
@@ -231,7 +231,7 @@ ItemSimple.prototype.unserialize = function(str) {
 */
 ItemSimple.prototype.check_ = function(check) {
     try {
-       //DEBUGCheckArgumentsAreValids(arguments, 1);
+        DEBUGCheckArgumentsAreValids(arguments, 1);
 
         var self_ = this;
 
