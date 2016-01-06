@@ -24,14 +24,18 @@ module.exports = function(grunt) {
         watch: {
             scripts: {
                 files: ['src/*.js'],
-                tasks: ['build']
+                tasks: ['build-dev']
             },
         },
         concat: {
-            dist: {
+            dev: {
+                src: ['src/itemsimple.js', 'src/list.js', 'src/sosimplist.js'],
+                dest: 'dist/sosimplist.min.js',
+            },
+            prod: {
                 src: ['src/itemsimple.js', 'src/list.js', 'src/sosimplist.js'],
                 dest: 'dist/sosimplist.js',
-            },
+            }
         },
         uglify: {
             options: {
@@ -120,11 +124,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma-coveralls');
     
     // task(s). DEV
-    grunt.registerTask('build-dev', ['concat', 'regex-replace:dev', 'uglify']);
+    grunt.registerTask('build-dev', ['concat:dev', 'regex-replace:dev']);
     grunt.registerTask('dev', ['build-dev', 'karma:dev', 'connect:server', 'open:server', 'open:test', 'watch']);
     
     // task(s). PROD
-    grunt.registerTask('build-prod', ['concat', 'regex-replace:build', 'uglify']);
+    grunt.registerTask('build-prod', ['concat:prod', 'regex-replace:build', 'uglify']);
     grunt.registerTask('semaphore', ['build-prod', 'karma:prod', 'coveralls']);
     grunt.registerTask('prod', ['build-prod', 'karma:prod']);
     

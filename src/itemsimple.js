@@ -146,34 +146,32 @@ ItemSimple.prototype.buildView = function() {
 
  /**
 * @public
-* @return {string} return content serialize in a base64 string
+* @return {object} return serialized object 
 */
 ItemSimple.prototype.serialize = function() {
     var self_ = this;
     var content = {
-        id_: self_.id_,
-        checked_: self_.checked_,
-        text_: self_.text_
+        checked: self_.checked_,
+        text: self_.text_
     };
-    return JSON.stringify(content);
+    return content;
 };
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {object} obj serialized to decode
  */
-ItemSimple.prototype.unserialize = function(str) {
+ItemSimple.prototype.unserialize = function(obj) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
-        if (str) {
+        if (obj) {
             var self_ = this;
-            var content = JSON.parse(str);
-            self_.id_ = content.id_;
-            self_.checked_ = content.checked_;
-            self_.text_ = content.text_;
+            self_.id_ = obj.id_;
+            self_.checked_ = obj.checked;
+            self_.text_ = obj.text;
         }
         else {
-            throw new Error('Input str = ' + str + ', does not contain data to unserialize!');
+            throw new Error('Input obj = ' + obj + ', does not contain data to unserialize!');
         }
     }
     catch (e) {

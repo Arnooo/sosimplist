@@ -4,7 +4,22 @@
     <script  type="text/javascript" src="lib/debug.js"></script>
     <script  type="text/javascript" src="dist/sosimplist.min.js"></script>
 </head>
-<body onload="sosimplist.init('view-sosimplist',{edit:true});">
+<body onload="sosimplist.init('view-sosimplist',{
+        edit : true,
+        data : [
+                {title : 'Todo',
+                items : [
+                    {checked : false, text : 'Task 1'},
+                    {checked : false, text : 'Task 2'}
+                ]},
+                {title : 'Course',
+                items : [
+                    {checked : false, text : 'Jambon'},
+                    {checked : true, text : 'Fromage'},
+                    {checked : false, text : 'Riz'}
+                ]}
+            ]
+    });">
     <a href="https://github.com/Arnooo/sosimplist">View source code on Github</a>    
     <div id="view-sosimplist"></div>
 </body>

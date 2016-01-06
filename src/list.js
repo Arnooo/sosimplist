@@ -255,23 +255,22 @@ List.prototype.buildView = function() {
 
 /**
 * @public
-* @return {string} return content serialize in a base64 string
+* @return {object} return serialized object
 */
 List.prototype.serialize = function() {
     try {
         var self_ = this;
         var content = {
-            id_: self_.id_,
-            title_: self_.title_,
-            arrayOfItem_: [] // parse element array to save item order
+            title: self_.title_,
+            items: [] // parse element array to save item order
         };
         for (var i = 0; i < self_.itemContainer_.children.length; i++) {
-            content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainer_.children[i].id].serialize());
+            content.items.push(self_.mapOfItem_[self_.itemContainer_.children[i].id].serialize());
         }
         for (var j = 0; j < self_.itemContainerChecked_.children.length; j++) {
-            content.arrayOfItem_.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
+            content.items.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
         }
-        return JSON.stringify(content);
+        return content;
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -280,18 +279,18 @@ List.prototype.serialize = function() {
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {object} obj content serialized to decode
  */
-List.prototype.unserialize = function(str) {
+List.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
-        var content = JSON.parse(str);
-        self_.id_ = content.id_;
-        self_.title_ = content.title_;
+        self_.id_ = obj.id_;
+        self_.title_ = obj.title;
         self_.mapOfItem_ = {};
-        for (var i = 0; i < content.arrayOfItem_.length; i++) {
+        for (var i = 0; i < obj.items.length; i++) {
             var myItem = new ItemSimple(self_, self_.options_);
-            myItem.unserialize(content.arrayOfItem_[i]);
+            obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
+            myItem.unserialize(obj.items[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
         }
