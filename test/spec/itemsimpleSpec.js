@@ -109,28 +109,25 @@ describe("ItemSimple", function() {
     });
 
     describe("when item is serialized", function() {
-      it("should return a JSON object which contains the main data", function() {
+      it("should return an object which contains the main data", function() {
         var data = itemsimple.serialize();
         var shouldBeData = {
-            id_: itemsimple.id_,
-            checked_: itemsimple.checked_,
-            text_: itemsimple.text_
+            checked: itemsimple.checked_,
+            text: itemsimple.text_
         };
-        expect(data).toEqual(JSON.stringify(shouldBeData));
+        expect(data).toEqual(shouldBeData);
       });
     });
 
     describe("when item is unserialized", function() {
       it("should extract data and initialize the item", function() {    
         var inputData = {
-            id_: itemsimple.id_,
-            checked_: itemsimple.checked_,
-            text_: itemsimple.text_
+            checked: itemsimple.checked_,
+            text: itemsimple.text_
         };    
-        itemsimple.unserialize(JSON.stringify(inputData));
-        expect(itemsimple.getId()).toEqual(inputData.id_);
-        expect(itemsimple.checked_).toEqual(inputData.checked_);
-        expect(itemsimple.text_).toEqual(inputData.text_);
+        itemsimple.unserialize(inputData);
+        expect(itemsimple.checked_).toEqual(inputData.checked);
+        expect(itemsimple.text_).toEqual(inputData.text);
       });
 
       it("should fail when we do not send data to extract in parameter", function() { 
@@ -142,11 +139,10 @@ describe("ItemSimple", function() {
   describe("when data are unserialized and view is build", function() {
     beforeEach(function() {
         var inputData = {
-            id_: 123,
-            checked_: true,
-            text_: 'InitText'
+            checked: true,
+            text: 'InitText'
         };    
-        itemsimple.unserialize(JSON.stringify(inputData));
+        itemsimple.unserialize(inputData);
         itemsimple.buildView();
         setFixtures(itemsimple.getView());
     });
@@ -158,9 +154,6 @@ describe("ItemSimple", function() {
     it("should initialize the checkbox", function() {
       expect(itemsimple.isChecked()).toEqual(true);
       expect($('.sosimplist-item-checkbox').is(":checked")).toBe(true);
-    });
-    it("should initialize the id", function() {
-      expect(itemsimple.getId()).toEqual(123);
     });
   });
 });
