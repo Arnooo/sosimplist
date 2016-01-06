@@ -44,7 +44,7 @@ module.exports = function(grunt) {
         },
         "regex-replace": {
             build: {
-                src: ['src/*.js'],
+                src: ['dist/<%= pkg.name %>.js'],
                 actions: [
                     {
                         name: 'DEBUG',
@@ -52,6 +52,17 @@ module.exports = function(grunt) {
                         replace: '//DEBUG',
                         flags: 'g'
                     }
+                ]
+            },
+            dev: {
+                src: ['dist/<%= pkg.name %>.js'],
+                actions: [
+                {
+                    name: 'DEBUG',
+                     search: '(^|\\s)//DEBUG',
+                               replace: 'DEBUG',
+                               flags: 'g'
+                }
                 ]
             }
         },
@@ -63,6 +74,7 @@ module.exports = function(grunt) {
                 'bower_components/jquery/dist/jquery.min.js',
                 'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
                 'bower_components/jquery-simulate/jquery.simulate.js',
+                'lib/*.js', 
                 'src/*.js', 
                 'test/spec/*.js'],
                 reporters: ['progress', 'html', 'coverage'],
@@ -78,12 +90,12 @@ module.exports = function(grunt) {
                 },
                 frameworks: ['jasmine']
             },
-            semaphore: {
-                singleRun: true
-            },
             dev: {
                 background: true,
                 singleRun: false
+            },
+            prod: {
+                singleRun: true
             }
         },
         coveralls: {            
@@ -107,10 +119,16 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-karma-coveralls');
     
-    // task(s).
-    grunt.registerTask('build', ['regex-replace', 'concat', 'uglify']);
-    grunt.registerTask('semaphore', ['build', 'karma:semaphore', 'coveralls']);
-    grunt.registerTask('dev', ['build', 'karma:dev', 'connect:server', 'open:server', 'open:test', 'watch']);
-    grunt.registerTask('default', ['build']);
+    // task(s). DEV
+    grunt.registerTask('build-dev', ['concat', 'regex-replace:dev', 'uglify']);
+    grunt.registerTask('dev', ['build-dev', 'karma:dev', 'connect:server', 'open:server', 'open:test', 'watch']);
+    
+    // task(s). PROD
+    grunt.registerTask('build-prod', ['concat', 'regex-replace:build', 'uglify']);
+    grunt.registerTask('semaphore', ['build-prod', 'karma:prod', 'coveralls']);
+    grunt.registerTask('prod', ['build-prod', 'karma:prod']);
+    
+    // task(s). DEFAULT
+    grunt.registerTask('default', ['prod']);
     
 };
