@@ -1,5 +1,5 @@
 /**
- * Item simple object
+ * Item base object
  */
 
  /**
@@ -9,7 +9,6 @@
   * @param {object} options is used to configure the item
   */
  function ItemBase(parent, options) {
-   //DEBUGCheckArgumentsAreValids(arguments, 2);
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -17,13 +16,12 @@
     self_.checked_ = false;
     self_.text_ = '';
     self_.view_ = null;
-    console.log("ItemBase ", parent, options);
  }
 
  /**
  * @public
  */
-ItemBase.prototype.buildView = function() {
+ItemBase.prototype.buildBase = function() {
     
     var self_ = this;
     if (self_.view_ === null) {
@@ -142,7 +140,7 @@ ItemBase.prototype.buildView = function() {
         self_.check_(self_.checked_);
     }
     else {
-       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+       console.error('Item base ID = ' + self_.id_ + ', View already builded !');
     }
 };
 
@@ -150,7 +148,7 @@ ItemBase.prototype.buildView = function() {
 * @public
 * @return {object} return serialized object 
 */
-ItemBase.prototype.serialize = function() {
+ItemBase.prototype.serializeBase = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
@@ -163,7 +161,7 @@ ItemBase.prototype.serialize = function() {
  * @public
  * @param {object} obj serialized to decode
  */
-ItemBase.prototype.unserialize = function(obj) {
+ItemBase.prototype.unserializeBase = function(obj) {
     try {
        //DEBUGCheckArgumentsAreValids(arguments, 1);
         if (obj) {
@@ -294,8 +292,18 @@ ItemBase.prototype.check_ = function(check) {
          console.error('Item type = ' + itemType + ' not supported yet !');
     }
  }
+
+ /**
+ * @private
+ * @return {Object}
+ */
+function ItemFactory_create() {
+    return new ItemFactory();
+}
+
+var itemfactory = ItemFactory_create();
 /**
- * Item simple object
+ * Item text object
  */
 
 /**
@@ -306,21 +314,17 @@ ItemBase.prototype.check_ = function(check) {
  * @param {object} options is used to configure the item
  */
 function ItemText(parent, options) {
-   //DEBUGCheckArgumentsAreValids(arguments, 2);
-    ItemBase.call(this, parent, options);
-    
-    console.log("ItemText ", parent, options);
+    ItemBase.apply(this, arguments);
 }
 
-ItemText.prototype.super = new ItemBase();
+ItemText.prototype = new ItemBase();
 
 /**
  * @public
  */
 ItemText.prototype.buildView = function() {
     var self_ = this;
-    self_.super.buildView();
-    console.log("ItemText buildView");
+    self_.buildBase();
 };
 
 /**
@@ -329,7 +333,7 @@ ItemText.prototype.buildView = function() {
  */
 ItemText.prototype.serialize = function() {
     var self_ = this;
-    self_.super.serialize();
+    self_.serializeBase();
 };
 
 /**
@@ -338,11 +342,11 @@ ItemText.prototype.serialize = function() {
  */
 ItemText.prototype.unserialize = function(obj) {
     var self_ = this;
-    self_.super.unserialize(obj);
+    self_.unserializeBase(obj);
 };
 
 /**
- * Item simple object
+ * Item text+comment object
  */
 
 /**
@@ -353,21 +357,40 @@ ItemText.prototype.unserialize = function(obj) {
  * @param {object} options is used to configure the item
  */
 function ItemTextComment(parent, options) {
-   //DEBUGCheckArgumentsAreValids(arguments, 2);
-    ItemBase.call(this, parent, options);
-    
-    console.log("ItemTextComment ", parent, options);
+    var self_ = this;
+    ItemBase.apply(this, arguments);
+    self_.comment_='';
 }
 
-ItemTextComment.prototype.super = new ItemBase();
+ItemTextComment.prototype = new ItemBase();
 
 /**
  * @public
  */
 ItemTextComment.prototype.buildView = function() {
     var self_ = this;
-    self_.super.buildView();
-    console.log("ItemTextComment buildView");
+    self_.buildBase();
+    var itemBaseView = self_.view_;
+    if (itemBaseView) {
+        var inputComment = document.createElement('div');
+        inputComment.id = 'sosimplist-item-text' + self_.id_;
+        inputComment.className = 'sosimplist-item-text sosimplist-editable';
+        //enable eddition
+        if (self_.options_.edit) {
+            inputComment.contentEditable = true;
+        }
+        else {
+            inputComment.className += ' sosimplist-edit-false';
+        }
+        inputComment.setAttribute('placeholder', 'write a comment');
+        if (self_.comment_ !== '') {
+            inputComment.innerHTML = self_.comment_;
+        }else {}
+        itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+    }
+    else {
+       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+    }
 };
 
 /**
@@ -376,7 +399,7 @@ ItemTextComment.prototype.buildView = function() {
  */
 ItemTextComment.prototype.serialize = function() {
     var self_ = this;
-    self_.super.serialize();
+    self_.serializeBase();
 };
 
 /**
@@ -384,8 +407,20 @@ ItemTextComment.prototype.serialize = function() {
  * @param {object} obj serialized to decode
  */
 ItemTextComment.prototype.unserialize = function(obj) {
-    var self_ = this;
-    self_.super.unserialize(obj);
+    try {
+       //DEBUGCheckArgumentsAreValids(arguments, 1);
+        if (obj) {
+            var self_ = this;
+            self_.unserializeBase(obj);
+            self_.comment_ = obj.comment;
+        }
+        else {
+            throw new Error('Input obj = ' + obj + ', does not contain data to unserialize!');
+        }
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
 };
 
 /**
@@ -678,7 +713,7 @@ List.prototype.unserialize = function(obj) {
         self_.title_ = obj.title;
         self_.mapOfItem_ = {};
         for (var i = 0; i < obj.items.length; i++) {
-            var myItem = new ItemBase(self_, self_.options_);
+            var myItem = itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
             obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
             myItem.unserialize(obj.items[i]);
             myItem.buildView();
@@ -706,7 +741,7 @@ List.prototype.getId = function() {
 List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = new ItemBase(self_, self_.options_);
+        var myItem = itemfactory.create('ItemText', self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {

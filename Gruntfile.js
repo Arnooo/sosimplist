@@ -50,7 +50,7 @@ module.exports = function(grunt) {
         },
         "regex-replace": {
             prod: {
-                src: ['dist/<%= pkg.name %>.js'],
+                src: ['dist/<%= pkg.name %>.js', 'index.html'],
                 actions: [
                     {
                         name: 'DEBUG',

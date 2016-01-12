@@ -1,7 +1,4 @@
 describe("ItemFactory", function() {
-  var itemfactory;
-  var itembase;
-  var itemtext;
 
   beforeEach(function() {
     var Parent = function(){};
@@ -10,18 +7,21 @@ describe("ItemFactory", function() {
       return new Parent();
     };
     parent = Parent.createInstance();
-//     itembase = new ItemBase(parent, {edit:true});
-//     itemtext = new ItemText(parent, {edit:true});
-    itemfactory = new ItemFactory();
     spyOn(parent, "dispatch");
     spyOn(console, 'error');
   });
 
-  it("should TODO", function() {
-//       itemtext.buildView();
-      var item = itemfactory.create('ItemBase');
-      console.log(item);
-//       itembase.buildView();
-      expect(true).toEqual(true);
+  it("should be able to create an ItemText with correct options", function() {
+      var itemtext = itemfactory.create('ItemText', parent, {edit:false, checkable:false});
+      expect(itemtext.options_.edit).toEqual(false);
+      expect(itemtext.parent_).toEqual(parent);
+      expect(itemtext.options_.checkable).toEqual(false);
+  });
+
+  it("should be able to create an ItemTextComment with correct options", function() {
+      var itemtext = itemfactory.create('ItemTextComment', parent, {edit:false, checkable:false});
+      expect(itemtext.options_.edit).toEqual(false);
+      expect(itemtext.parent_).toEqual(parent);
+      expect(itemtext.options_.checkable).toEqual(false);
   });
 });

@@ -29,12 +29,12 @@ describe("ItemBase", function() {
 
   describe("when view is builded", function() {
     beforeEach(function() {
-      itembase.buildView();
+      itembase.buildBase();
       setFixtures(itembase.getView());
     });
 
     it("should not initialized a second time the view calling buildView", function() {
-      itembase.buildView();
+      itembase.buildBase();
       expect(console.error).toHaveBeenCalled();
     });
 
@@ -110,7 +110,7 @@ describe("ItemBase", function() {
 
     describe("when item is serialized", function() {
       it("should return an object which contains the main data", function() {
-        var data = itembase.serialize();
+        var data = itembase.serializeBase();
         var shouldBeData = {
             checked: itembase.checked_,
             text: itembase.text_
@@ -125,13 +125,13 @@ describe("ItemBase", function() {
             checked: itembase.checked_,
             text: itembase.text_
         };    
-        itembase.unserialize(inputData);
+        itembase.unserializeBase(inputData);
         expect(itembase.checked_).toEqual(inputData.checked);
         expect(itembase.text_).toEqual(inputData.text);
       });
 
       it("should fail when we do not send data to extract in parameter", function() { 
-        itembase.unserialize();
+        itembase.unserializeBase();
         expect(console.error).toHaveBeenCalled();
       });
     });
@@ -142,8 +142,8 @@ describe("ItemBase", function() {
             checked: true,
             text: 'InitText'
         };    
-        itembase.unserialize(inputData);
-        itembase.buildView();
+        itembase.unserializeBase(inputData);
+        itembase.buildBase();
         setFixtures(itembase.getView());
     });
 

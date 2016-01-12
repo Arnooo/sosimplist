@@ -288,7 +288,7 @@ List.prototype.unserialize = function(obj) {
         self_.title_ = obj.title;
         self_.mapOfItem_ = {};
         for (var i = 0; i < obj.items.length; i++) {
-            var myItem = new ItemBase(self_, self_.options_);
+            var myItem = itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
             obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
             myItem.unserialize(obj.items[i]);
             myItem.buildView();
@@ -316,7 +316,7 @@ List.prototype.getId = function() {
 List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = new ItemBase(self_, self_.options_);
+        var myItem = itemfactory.create('ItemText', self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {

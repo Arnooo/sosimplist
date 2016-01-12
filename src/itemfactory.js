@@ -24,3 +24,13 @@
          console.error('Item type = ' + itemType + ' not supported yet !');
     }
  }
+
+ /**
+ * @private
+ * @return {Object}
+ */
+function ItemFactory_create() {
+    return new ItemFactory();
+}
+
+var itemfactory = ItemFactory_create();

@@ -1,5 +1,5 @@
 /**
- * Item simple object
+ * Item text object
  */
 
 /**
@@ -10,21 +10,17 @@
  * @param {object} options is used to configure the item
  */
 function ItemText(parent, options) {
-    DEBUGCheckArgumentsAreValids(arguments, 2);
-    ItemBase.call(this, parent, options);
-    
-    console.log("ItemText ", parent, options);
+    ItemBase.apply(this, arguments);
 }
 
-ItemText.prototype.super = new ItemBase();
+ItemText.prototype = new ItemBase();
 
 /**
  * @public
  */
 ItemText.prototype.buildView = function() {
     var self_ = this;
-    self_.super.buildView();
-    console.log("ItemText buildView");
+    self_.buildBase();
 };
 
 /**
@@ -33,7 +29,7 @@ ItemText.prototype.buildView = function() {
  */
 ItemText.prototype.serialize = function() {
     var self_ = this;
-    self_.super.serialize();
+    self_.serializeBase();
 };
 
 /**
@@ -42,5 +38,5 @@ ItemText.prototype.serialize = function() {
  */
 ItemText.prototype.unserialize = function(obj) {
     var self_ = this;
-    self_.super.unserialize(obj);
+    self_.unserializeBase(obj);
 };

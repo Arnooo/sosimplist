@@ -1,5 +1,5 @@
 /**
- * Item simple object
+ * Item text+comment object
  */
 
 /**
@@ -10,21 +10,40 @@
  * @param {object} options is used to configure the item
  */
 function ItemTextComment(parent, options) {
-    DEBUGCheckArgumentsAreValids(arguments, 2);
-    ItemBase.call(this, parent, options);
-    
-    console.log("ItemTextComment ", parent, options);
+    var self_ = this;
+    ItemBase.apply(this, arguments);
+    self_.comment_='';
 }
 
-ItemTextComment.prototype.super = new ItemBase();
+ItemTextComment.prototype = new ItemBase();
 
 /**
  * @public
  */
 ItemTextComment.prototype.buildView = function() {
     var self_ = this;
-    self_.super.buildView();
-    console.log("ItemTextComment buildView");
+    self_.buildBase();
+    var itemBaseView = self_.view_;
+    if (itemBaseView) {
+        var inputComment = document.createElement('div');
+        inputComment.id = 'sosimplist-item-text' + self_.id_;
+        inputComment.className = 'sosimplist-item-text sosimplist-editable';
+        //enable eddition
+        if (self_.options_.edit) {
+            inputComment.contentEditable = true;
+        }
+        else {
+            inputComment.className += ' sosimplist-edit-false';
+        }
+        inputComment.setAttribute('placeholder', 'write a comment');
+        if (self_.comment_ !== '') {
+            inputComment.innerHTML = self_.comment_;
+        }else {}
+        itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+    }
+    else {
+       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+    }
 };
 
 /**
@@ -33,7 +52,7 @@ ItemTextComment.prototype.buildView = function() {
  */
 ItemTextComment.prototype.serialize = function() {
     var self_ = this;
-    self_.super.serialize();
+    self_.serializeBase();
 };
 
 /**
@@ -41,6 +60,18 @@ ItemTextComment.prototype.serialize = function() {
  * @param {object} obj serialized to decode
  */
 ItemTextComment.prototype.unserialize = function(obj) {
-    var self_ = this;
-    self_.super.unserialize(obj);
+    try {
+        DEBUGCheckArgumentsAreValids(arguments, 1);
+        if (obj) {
+            var self_ = this;
+            self_.unserializeBase(obj);
+            self_.comment_ = obj.comment;
+        }
+        else {
+            throw new Error('Input obj = ' + obj + ', does not contain data to unserialize!');
+        }
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
 };

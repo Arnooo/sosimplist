@@ -1,5 +1,5 @@
 /**
- * Item simple object
+ * Item base object
  */
 
  /**
@@ -9,7 +9,6 @@
   * @param {object} options is used to configure the item
   */
  function ItemBase(parent, options) {
-    DEBUGCheckArgumentsAreValids(arguments, 2);
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -17,13 +16,12 @@
     self_.checked_ = false;
     self_.text_ = '';
     self_.view_ = null;
-    console.log("ItemBase ", parent, options);
  }
 
  /**
  * @public
  */
-ItemBase.prototype.buildView = function() {
+ItemBase.prototype.buildBase = function() {
     
     var self_ = this;
     if (self_.view_ === null) {
@@ -142,7 +140,7 @@ ItemBase.prototype.buildView = function() {
         self_.check_(self_.checked_);
     }
     else {
-       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+       console.error('Item base ID = ' + self_.id_ + ', View already builded !');
     }
 };
 
@@ -150,7 +148,7 @@ ItemBase.prototype.buildView = function() {
 * @public
 * @return {object} return serialized object 
 */
-ItemBase.prototype.serialize = function() {
+ItemBase.prototype.serializeBase = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
@@ -163,7 +161,7 @@ ItemBase.prototype.serialize = function() {
  * @public
  * @param {object} obj serialized to decode
  */
-ItemBase.prototype.unserialize = function(obj) {
+ItemBase.prototype.unserializeBase = function(obj) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
         if (obj) {
