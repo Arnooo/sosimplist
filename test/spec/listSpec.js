@@ -21,7 +21,7 @@ describe("List", function() {
   it("should have one default item in the list", function() {
     var count = 0;
     for (var itemId in list.mapOfItem_) {
-        expect(list.mapOfItem_[itemId]).toEqual(jasmine.any(ItemSimple));
+        expect(list.mapOfItem_[itemId]).toEqual(jasmine.any(ItemBase));
         count++;
     }
     expect(count).toEqual(1);

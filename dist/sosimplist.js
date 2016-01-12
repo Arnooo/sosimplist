@@ -6,10 +6,10 @@
   * @public
   * @constructor
   * @param {object} parent
-  * @param {object} options is used to configure the itemsimple
+  * @param {object} options is used to configure the item
   */
- function ItemSimple(parent, options) {
-    DEBUGCheckArgumentsAreValids(arguments, 2);
+ function ItemBase(parent, options) {
+   //DEBUGCheckArgumentsAreValids(arguments, 2);
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -17,12 +17,14 @@
     self_.checked_ = false;
     self_.text_ = '';
     self_.view_ = null;
+    console.log("ItemBase ", parent, options);
  }
 
  /**
  * @public
  */
-ItemSimple.prototype.buildView = function() {
+ItemBase.prototype.buildView = function() {
+    
     var self_ = this;
     if (self_.view_ === null) {
         self_.view_ = document.createElement('div');
@@ -146,32 +148,32 @@ ItemSimple.prototype.buildView = function() {
 
  /**
 * @public
-* @return {string} return content serialize in a base64 string
+* @return {object} return serialized object 
 */
-ItemSimple.prototype.serialize = function() {
+ItemBase.prototype.serialize = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
         text: self_.text_
     };
-    return JSON.stringify(content);
+    return content;
 };
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {object} obj serialized to decode
  */
-ItemSimple.prototype.unserialize = function(str) {
+ItemBase.prototype.unserialize = function(obj) {
     try {
-        DEBUGCheckArgumentsAreValids(arguments, 1);
-        if (str) {
+       //DEBUGCheckArgumentsAreValids(arguments, 1);
+        if (obj) {
             var self_ = this;
-            var content = JSON.parse(str);
-            self_.checked_ = content.checked;
-            self_.text_ = content.text;
+            self_.id_ = obj.id_;
+            self_.checked_ = obj.checked;
+            self_.text_ = obj.text;
         }
         else {
-            throw new Error('Input str = ' + str + ', does not contain data to unserialize!');
+            throw new Error('Input obj = ' + obj + ', does not contain data to unserialize!');
         }
     }
     catch (e) {
@@ -183,7 +185,7 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   * @return {element} return view as Element object to be placed in the view
   */
- ItemSimple.prototype.getView = function() {
+ ItemBase.prototype.getView = function() {
     return this.view_;
  };
 
@@ -191,7 +193,7 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   * @return {string} return item id
   */
- ItemSimple.prototype.getId = function() {
+ ItemBase.prototype.getId = function() {
     return this.id_;
  };
 
@@ -199,14 +201,14 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   * @return {bool} return if item is checked
   */
- ItemSimple.prototype.isChecked = function() {
+ ItemBase.prototype.isChecked = function() {
     return this.checked_;
  };
 
 /**
   * @public
   */
- ItemSimple.prototype.focus = function() {
+ ItemBase.prototype.focus = function() {
     try {
         var self_ = this;
         var el = document.getElementById('sosimplist-item-text' + self_.id_);
@@ -227,9 +229,9 @@ ItemSimple.prototype.unserialize = function(str) {
 * @private
 * @param {bool} check item or not
 */
-ItemSimple.prototype.check_ = function(check) {
+ItemBase.prototype.check_ = function(check) {
     try {
-        DEBUGCheckArgumentsAreValids(arguments, 1);
+       //DEBUGCheckArgumentsAreValids(arguments, 1);
 
         var self_ = this;
 
@@ -265,6 +267,126 @@ ItemSimple.prototype.check_ = function(check) {
         console.error(e.name + ': ' + e.message);
     }
 }
+
+
+ /**
+  * @public
+  * @constructor
+  */
+ function ItemFactory() {
+     var self_ = this;
+ }
+ 
+ 
+ /**
+  * @public
+  * @param {string} itemType is the type of the item to be created by the factory
+  * @return {object} return the object asked
+  */
+ ItemFactory.prototype.create = function(itemType, parent, options) {
+     if(itemType === 'ItemText'){
+         return new ItemText(parent, options);
+     }
+     else if(itemType === 'ItemTextComment'){
+         return new ItemTextComment(parent, options);
+     }
+     else{
+         console.error('Item type = ' + itemType + ' not supported yet !');
+    }
+ }
+/**
+ * Item simple object
+ */
+
+/**
+ * @public
+ * @constructor
+ * @extends {ItemBase}
+ * @param {object} parent
+ * @param {object} options is used to configure the item
+ */
+function ItemText(parent, options) {
+   //DEBUGCheckArgumentsAreValids(arguments, 2);
+    ItemBase.call(this, parent, options);
+    
+    console.log("ItemText ", parent, options);
+}
+
+ItemText.prototype.super = new ItemBase();
+
+/**
+ * @public
+ */
+ItemText.prototype.buildView = function() {
+    var self_ = this;
+    self_.super.buildView();
+    console.log("ItemText buildView");
+};
+
+/**
+ * @public
+ * @return {object} return serialized object 
+ */
+ItemText.prototype.serialize = function() {
+    var self_ = this;
+    self_.super.serialize();
+};
+
+/**
+ * @public
+ * @param {object} obj serialized to decode
+ */
+ItemText.prototype.unserialize = function(obj) {
+    var self_ = this;
+    self_.super.unserialize(obj);
+};
+
+/**
+ * Item simple object
+ */
+
+/**
+ * @public
+ * @constructor
+ * @extends {ItemBase}
+ * @param {object} parent
+ * @param {object} options is used to configure the item
+ */
+function ItemTextComment(parent, options) {
+   //DEBUGCheckArgumentsAreValids(arguments, 2);
+    ItemBase.call(this, parent, options);
+    
+    console.log("ItemTextComment ", parent, options);
+}
+
+ItemTextComment.prototype.super = new ItemBase();
+
+/**
+ * @public
+ */
+ItemTextComment.prototype.buildView = function() {
+    var self_ = this;
+    self_.super.buildView();
+    console.log("ItemTextComment buildView");
+};
+
+/**
+ * @public
+ * @return {object} return serialized object 
+ */
+ItemTextComment.prototype.serialize = function() {
+    var self_ = this;
+    self_.super.serialize();
+};
+
+/**
+ * @public
+ * @param {object} obj serialized to decode
+ */
+ItemTextComment.prototype.unserialize = function(obj) {
+    var self_ = this;
+    self_.super.unserialize(obj);
+};
 
 /**
  * List object
@@ -523,7 +645,7 @@ List.prototype.buildView = function() {
 
 /**
 * @public
-* @return {string} return content serialize in a base64 string
+* @return {object} return serialized object
 */
 List.prototype.serialize = function() {
     try {
@@ -538,7 +660,7 @@ List.prototype.serialize = function() {
         for (var j = 0; j < self_.itemContainerChecked_.children.length; j++) {
             content.items.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
         }
-        return JSON.stringify(content);
+        return content;
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -547,17 +669,18 @@ List.prototype.serialize = function() {
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {object} obj content serialized to decode
  */
-List.prototype.unserialize = function(str) {
+List.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
-        var content = JSON.parse(str);
-        self_.title_ = content.title;
+        self_.id_ = obj.id_;
+        self_.title_ = obj.title;
         self_.mapOfItem_ = {};
-        for (var i = 0; i < content.items.length; i++) {
-            var myItem = new ItemSimple(self_, self_.options_);
-            myItem.unserialize(content.items[i]);
+        for (var i = 0; i < obj.items.length; i++) {
+            var myItem = new ItemBase(self_, self_.options_);
+            obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
+            myItem.unserialize(obj.items[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
         }
@@ -583,7 +706,7 @@ List.prototype.getId = function() {
 List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = new ItemSimple(self_, self_.options_);
+        var myItem = new ItemBase(self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
@@ -785,8 +908,8 @@ Sosimplist.prototype.init = function(viewId, options) {
             var dataToUnserialize = null;
             var hrefArray = window.location.href.split('#');
             // Try with init input parameters
-            if(self_.options_.data){
-                dataToUnserialize = self_.options_.data;
+            if(self_.options_.data && self_.options_.data.length > 0){
+                dataToUnserialize = JSON.stringify(self_.options_.data);
             }
             // Try with URI
             else if(hrefArray[1]){
@@ -983,10 +1106,10 @@ Sosimplist.prototype.unserialize = function(str) {
         var self_ = this;
         if(str){
             var content = JSON.parse(str);
-            self_.viewId_ = content.viewId_;
             self_.mapOfList_ = {};
             for (var i = 0; i < content.length; i++) {
                 var myList = new List(self_.options_);
+                content[i].id_ = content[i].id_ ? content[i].id_ : myList.getId()+i ;
                 myList.unserialize(content[i]);
                 myList.buildView();
                 self_.mapOfList_[myList.getId()] = myList;

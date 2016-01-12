@@ -1,6 +1,6 @@
-describe("ItemSimple", function() {
+describe("ItemBase", function() {
   var parent;
-  var itemsimple;
+  var itembase;
 
   beforeEach(function() {
     var Parent = function(){};
@@ -9,42 +9,42 @@ describe("ItemSimple", function() {
       return new Parent();
     };
     parent = Parent.createInstance();
-    itemsimple = new ItemSimple(parent, {edit:true});
+    itembase = new ItemBase(parent, {edit:true});
     spyOn(parent, "dispatch");
     spyOn(console, 'error');
   });
 
   it("should be initialized with default values", function() {
-    expect(itemsimple.getView()).toEqual(null);
-    expect(itemsimple.getId()).toEqual(itemsimple.id_);
-    expect(itemsimple.isChecked()).toEqual(false);
-    expect(itemsimple.text_).toEqual('');
-    expect(itemsimple.parent_).toEqual(parent);
+    expect(itembase.getView()).toEqual(null);
+    expect(itembase.getId()).toEqual(itembase.id_);
+    expect(itembase.isChecked()).toEqual(false);
+    expect(itembase.text_).toEqual('');
+    expect(itembase.parent_).toEqual(parent);
   });
 
   it("should fail on calling check_ function", function() {
-    itemsimple.check_(false);
+    itembase.check_(false);
     expect(console.error).toHaveBeenCalled();
   });
 
   describe("when view is builded", function() {
     beforeEach(function() {
-      itemsimple.buildView();
-      setFixtures(itemsimple.getView());
+      itembase.buildView();
+      setFixtures(itembase.getView());
     });
 
     it("should not initialized a second time the view calling buildView", function() {
-      itemsimple.buildView();
+      itembase.buildView();
       expect(console.error).toHaveBeenCalled();
     });
 
     it("should fail on calling check_ function with wrong parameter", function() {
-      itemsimple.check_(null);
+      itembase.check_(null);
       expect(console.error).toHaveBeenCalled();
     });
 
     it("should initialized the view", function() {
-      expect(itemsimple.getView()).not.toEqual(null);
+      expect(itembase.getView()).not.toEqual(null);
       
       expect($('.sosimplist-item')).toBeInDOM(true);
       expect($('.sosimplist-item')).toEqual('div');
@@ -75,14 +75,14 @@ describe("ItemSimple", function() {
       });
 
       it("should checked the checkbox", function() {
-        expect(itemsimple.isChecked()).toEqual(true);
+        expect(itembase.isChecked()).toEqual(true);
         expect($('.sosimplist-item-checkbox').is(":checked")).toBe(true);
       });
       it("should hide the selector", function() {
         expect($('.sosimplist-item-selector')).toHaveCss({visibility: "hidden"});
       });
       it("should dispatch event to parent", function() {
-        expect(parent.dispatch).toHaveBeenCalledWith('moveItem', itemsimple);
+        expect(parent.dispatch).toHaveBeenCalledWith('moveItem', itembase);
       });
     });
 
@@ -94,7 +94,7 @@ describe("ItemSimple", function() {
 
       it("should change the text displayed", function() {
         expect($('.sosimplist-item-text')[0].innerHTML).toEqual('A');
-        expect(itemsimple.text_).toEqual('A');
+        expect(itembase.text_).toEqual('A');
       });
     });    
 
@@ -104,16 +104,16 @@ describe("ItemSimple", function() {
       });
 
       it("should dispatch event to parent", function() {
-        expect(parent.dispatch).toHaveBeenCalledWith('removeItem', itemsimple);
+        expect(parent.dispatch).toHaveBeenCalledWith('removeItem', itembase);
       });
     });
 
     describe("when item is serialized", function() {
       it("should return an object which contains the main data", function() {
-        var data = itemsimple.serialize();
+        var data = itembase.serialize();
         var shouldBeData = {
-            checked: itemsimple.checked_,
-            text: itemsimple.text_
+            checked: itembase.checked_,
+            text: itembase.text_
         };
         expect(data).toEqual(shouldBeData);
       });
@@ -122,16 +122,16 @@ describe("ItemSimple", function() {
     describe("when item is unserialized", function() {
       it("should extract data and initialize the item", function() {    
         var inputData = {
-            checked: itemsimple.checked_,
-            text: itemsimple.text_
+            checked: itembase.checked_,
+            text: itembase.text_
         };    
-        itemsimple.unserialize(inputData);
-        expect(itemsimple.checked_).toEqual(inputData.checked);
-        expect(itemsimple.text_).toEqual(inputData.text);
+        itembase.unserialize(inputData);
+        expect(itembase.checked_).toEqual(inputData.checked);
+        expect(itembase.text_).toEqual(inputData.text);
       });
 
       it("should fail when we do not send data to extract in parameter", function() { 
-        itemsimple.unserialize();
+        itembase.unserialize();
         expect(console.error).toHaveBeenCalled();
       });
     });
@@ -142,17 +142,17 @@ describe("ItemSimple", function() {
             checked: true,
             text: 'InitText'
         };    
-        itemsimple.unserialize(inputData);
-        itemsimple.buildView();
-        setFixtures(itemsimple.getView());
+        itembase.unserialize(inputData);
+        itembase.buildView();
+        setFixtures(itembase.getView());
     });
 
     it("should initialize the text", function() {
-      expect(itemsimple.text_).toEqual('InitText');
+      expect(itembase.text_).toEqual('InitText');
       expect($('.sosimplist-item-text')[0].innerHTML).toEqual('InitText');
     });
     it("should initialize the checkbox", function() {
-      expect(itemsimple.isChecked()).toEqual(true);
+      expect(itembase.isChecked()).toEqual(true);
       expect($('.sosimplist-item-checkbox').is(":checked")).toBe(true);
     });
   });

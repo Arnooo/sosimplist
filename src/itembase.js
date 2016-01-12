@@ -6,9 +6,9 @@
   * @public
   * @constructor
   * @param {object} parent
-  * @param {object} options is used to configure the itemsimple
+  * @param {object} options is used to configure the item
   */
- function ItemSimple(parent, options) {
+ function ItemBase(parent, options) {
     DEBUGCheckArgumentsAreValids(arguments, 2);
     var self_ = this;
     self_.parent_ = parent;
@@ -17,12 +17,14 @@
     self_.checked_ = false;
     self_.text_ = '';
     self_.view_ = null;
+    console.log("ItemBase ", parent, options);
  }
 
  /**
  * @public
  */
-ItemSimple.prototype.buildView = function() {
+ItemBase.prototype.buildView = function() {
+    
     var self_ = this;
     if (self_.view_ === null) {
         self_.view_ = document.createElement('div');
@@ -148,7 +150,7 @@ ItemSimple.prototype.buildView = function() {
 * @public
 * @return {object} return serialized object 
 */
-ItemSimple.prototype.serialize = function() {
+ItemBase.prototype.serialize = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
@@ -161,7 +163,7 @@ ItemSimple.prototype.serialize = function() {
  * @public
  * @param {object} obj serialized to decode
  */
-ItemSimple.prototype.unserialize = function(obj) {
+ItemBase.prototype.unserialize = function(obj) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
         if (obj) {
@@ -183,7 +185,7 @@ ItemSimple.prototype.unserialize = function(obj) {
   * @public
   * @return {element} return view as Element object to be placed in the view
   */
- ItemSimple.prototype.getView = function() {
+ ItemBase.prototype.getView = function() {
     return this.view_;
  };
 
@@ -191,7 +193,7 @@ ItemSimple.prototype.unserialize = function(obj) {
   * @public
   * @return {string} return item id
   */
- ItemSimple.prototype.getId = function() {
+ ItemBase.prototype.getId = function() {
     return this.id_;
  };
 
@@ -199,14 +201,14 @@ ItemSimple.prototype.unserialize = function(obj) {
   * @public
   * @return {bool} return if item is checked
   */
- ItemSimple.prototype.isChecked = function() {
+ ItemBase.prototype.isChecked = function() {
     return this.checked_;
  };
 
 /**
   * @public
   */
- ItemSimple.prototype.focus = function() {
+ ItemBase.prototype.focus = function() {
     try {
         var self_ = this;
         var el = document.getElementById('sosimplist-item-text' + self_.id_);
@@ -227,7 +229,7 @@ ItemSimple.prototype.unserialize = function(obj) {
 * @private
 * @param {bool} check item or not
 */
-ItemSimple.prototype.check_ = function(check) {
+ItemBase.prototype.check_ = function(check) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
 
