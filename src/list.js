@@ -55,39 +55,23 @@ List.prototype.buildView = function() {
              inputTitle.addEventListener(
                  'keyup',
                  function() { 
-                     if (event.keyCode === 13) {
-                         event.preventDefault();
-                         event.stopPropagation();
-                     }
-                     else {
-                        self_.title_ = this.innerHTML;
-                     }
+                    var inputThis = this;
+                    EventStrategy.key.enter.stop(event);
+                    EventStrategy.key.not.enter.todo(event, function(){self_.title_ = inputThis.innerHTML;});
                  },
                  false
              );
              inputTitle.addEventListener(
                 'keydown',
                 function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    EventStrategy.key.enter.stop(event);
                 },
                 false
             );
              inputTitle.addEventListener(
                 'keypress',
                 function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    EventStrategy.key.enter.stop(event);
                 },
                 false
             );

@@ -1,4 +1,36 @@
 /**
+ * Event strategy object
+ * This object synthetise events function do execute
+ */
+var EventStrategy = {
+    key:{
+        enter:{
+            stop:function(event, done){
+                if(event.keyCode === 13){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if(done){done();};
+                }
+                else{
+                    //Do nothing
+                }
+            }
+        },
+        not:{
+            enter:{
+                todo:function(event, done){
+                    if(event.keyCode !== 13 && done){
+                        done();
+                    }
+                    else{
+                        //Do nothing
+                    }
+                }
+            }
+        }
+    }
+};
+/**
  * Item base object
  */
 
@@ -73,36 +105,8 @@ ItemBase.prototype.buildBase = function() {
         inputText.addEventListener(
             'keyup',
             function(event) {
-                if (event.keyCode === 13 && self_.parent_) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    self_.parent_.dispatch('insertItemAfter', self_);
-                }
-                else {
+                if (event.keyCode !== 13) {
                     self_.text_ = this.innerHTML;
-                }
-            },
-            false
-        );
-        inputText.addEventListener(
-            'keydown',
-            function(event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                else {
-                    //Do nothing
-                }
-            },
-            false
-        );
-         inputText.addEventListener(
-            'keypress',
-            function(event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
                 }
                 else {
                     //Do nothing
@@ -112,7 +116,10 @@ ItemBase.prototype.buildBase = function() {
         );
         if (self_.text_ !== '') {
             inputText.innerHTML = self_.text_;
-        }else {}
+        }
+        else {
+            //Do nothing
+        }
         self_.view_.appendChild(inputText);
 
         if (self_.options_.edit) {
@@ -131,6 +138,28 @@ ItemBase.prototype.buildBase = function() {
                 false
             );
             self_.view_.appendChild(divDelete);
+
+            self_.view_.addEventListener(
+                'keyup',
+                function(event) {
+                    EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
+                },
+                false
+            );
+            self_.view_.addEventListener(
+                'keydown',
+                function(event) {
+                    EventStrategy.key.enter.stop(event);
+                },
+                false
+            );
+            self_.view_.addEventListener(
+                'keypress',
+                function(event) {
+                    EventStrategy.key.enter.stop(event);
+                },
+                false
+            );
         }
         else {
             //Do nothing
@@ -480,39 +509,23 @@ List.prototype.buildView = function() {
              inputTitle.addEventListener(
                  'keyup',
                  function() { 
-                     if (event.keyCode === 13) {
-                         event.preventDefault();
-                         event.stopPropagation();
-                     }
-                     else {
-                        self_.title_ = this.innerHTML;
-                     }
+                    var inputThis = this;
+                    EventStrategy.key.enter.stop(event);
+                    EventStrategy.key.not.enter.todo(event, function(){self_.title_ = inputThis.innerHTML;});
                  },
                  false
              );
              inputTitle.addEventListener(
                 'keydown',
                 function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    EventStrategy.key.enter.stop(event);
                 },
                 false
             );
              inputTitle.addEventListener(
                 'keypress',
                 function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    EventStrategy.key.enter.stop(event);
                 },
                 false
             );

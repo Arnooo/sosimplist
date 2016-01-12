@@ -53,7 +53,7 @@ module.exports = function(grunt) {
                 src: ['dist/<%= pkg.name %>.js', 'index.html'],
                 actions: [
                     {
-                        name: 'DEBUG',
+                        name: 'Comment DEBUG',
                         search: '(^|\\s)DEBUG',
                         replace: '//DEBUG',
                         flags: 'g'
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
                 src: ['dist/<%= pkg.name %>.js', 'index.html'],
                 actions: [
                     {
-                        name: 'DEBUG',
+                        name: 'Uncomment DEBUG',
                         search: '(^|\\s)//DEBUG',
                         replace: 'DEBUG',
                         flags: 'g'
