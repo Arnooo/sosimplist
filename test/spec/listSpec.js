@@ -177,6 +177,7 @@ describe("List", function() {
         var data = list.serialize();
         var shouldBeData = {
             title: list.title_,
+            image: list.image_,
             items: []
         };   
         for (var itemId in list.mapOfItem_) {

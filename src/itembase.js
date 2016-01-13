@@ -54,7 +54,8 @@ sosimplist.ItemBase.prototype.buildBase = function() {
         var inputText = sosimplist.elementfactory.create(
          'text',
          {
-            id: self_.id_,
+            id: 'sosimplist-item-text' + self_.id_,
+            className: 'sosimplist-item-text',
             keyup: function(event) {
                 var inputThis = this;
                 sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});

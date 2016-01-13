@@ -28,8 +28,8 @@
      }
      else if(elementType === 'text'){
         var inputText = document.createElement('div');
-        inputText.id = 'sosimplist-item-text' + options.id;
-        inputText.className = 'sosimplist-item-text sosimplist-editable';
+        inputText.id = options.id;
+        inputText.className = options.className+' sosimplist-editable';
         //enable eddition
         if (options.edit) {
             inputText.contentEditable = true;
@@ -39,6 +39,16 @@
         }
         inputText.setAttribute('placeholder', options.placeholder);
         inputText.addEventListener('keyup', options.keyup, false);
+        inputText.addEventListener(
+          'keydown',
+          sosimplist.EventStrategy.key.enter.stop,
+          false
+        );
+        inputText.addEventListener(
+          'keypress',
+          sosimplist.EventStrategy.key.enter.stop,
+          false
+        );
         inputText.innerHTML = options.text;
         return inputText;
      }
@@ -47,6 +57,17 @@
         divDelete.className = 'sosimplist-item-delete';
         divDelete.addEventListener('click',options.click,false);
         return divDelete;
+     }
+     else if(elementType === 'image'){
+        var divImg = document.createElement('div');
+        divImg.style.display = 'table-row';
+        divImg.className = 'sosimplist-list-row';
+        var imgElement = document.createElement('img');
+        imgElement.className = 'sosimplist-list-image';
+        imgElement.style.display = 'table-cell';s
+        imgElement.src = options.src;
+        divImg.appendChild(imgElement);
+        return divImg;
      }
      else{
          console.error('Element type = ' + elementType + ' not supported yet !');

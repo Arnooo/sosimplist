@@ -29,6 +29,7 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
          'text',
          {
             id: self_.id_,
+            className: 'sosimplist-item-text',
             keyup: function(event) {
                 var inputThis = this;
                 sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.comment_ = inputThis.innerHTML;});
