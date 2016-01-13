@@ -3,7 +3,7 @@
   * @public
   * @constructor
   */
- function ItemFactory() {
+ sosimplist.ItemFactory = function() {
      var self_ = this;
  }
  
@@ -13,12 +13,12 @@
   * @param {string} itemType is the type of the item to be created by the factory
   * @return {object} return the object asked
   */
- ItemFactory.prototype.create = function(itemType, parent, options) {
+ sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
      if(itemType === 'ItemText'){
-         return new ItemText(parent, options);
+         return new sosimplist.ItemText(parent, options);
      }
      else if(itemType === 'ItemTextComment'){
-         return new ItemTextComment(parent, options);
+         return new sosimplist.ItemTextComment(parent, options);
      }
      else{
          console.error('Item type = ' + itemType + ' not supported yet !');
@@ -30,7 +30,7 @@
  * @return {Object}
  */
 function ItemFactory_create() {
-    return new ItemFactory();
+    return new sosimplist.ItemFactory();
 }
 
-var itemfactory = ItemFactory_create();
+sosimplist.itemfactory = ItemFactory_create();

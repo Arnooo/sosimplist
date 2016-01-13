@@ -2,7 +2,7 @@
  * Event strategy object
  * This object synthetise events function do execute
  */
-var EventStrategy = {
+ sosimplist.EventStrategy = {
     key:{
         enter:{
             stop:function(event, done){

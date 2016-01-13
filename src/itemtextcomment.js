@@ -9,18 +9,18 @@
  * @param {object} parent
  * @param {object} options is used to configure the item
  */
-function ItemTextComment(parent, options) {
+sosimplist.ItemTextComment = function(parent, options) {
     var self_ = this;
-    ItemBase.apply(this, arguments);
+    sosimplist.ItemBase.apply(this, arguments);
     self_.comment_='';
 }
 
-ItemTextComment.prototype = new ItemBase();
+sosimplist.ItemTextComment.prototype = new sosimplist.ItemBase();
 
 /**
  * @public
  */
-ItemTextComment.prototype.buildView = function() {
+sosimplist.ItemTextComment.prototype.buildView = function() {
     var self_ = this;
     self_.buildBase();
     var itemBaseView = self_.view_;
@@ -50,16 +50,16 @@ ItemTextComment.prototype.buildView = function() {
  * @public
  * @return {object} return serialized object 
  */
-ItemTextComment.prototype.serialize = function() {
+sosimplist.ItemTextComment.prototype.serialize = function() {
     var self_ = this;
-    self_.serializeBase();
+    return self_.serializeBase();
 };
 
 /**
  * @public
  * @param {object} obj serialized to decode
  */
-ItemTextComment.prototype.unserialize = function(obj) {
+sosimplist.ItemTextComment.prototype.unserialize = function(obj) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
         if (obj) {

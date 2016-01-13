@@ -8,7 +8,7 @@
   * @param {object} parent
   * @param {object} options is used to configure the item
   */
- function ItemBase(parent, options) {
+ sosimplist.ItemBase = function(parent, options) {
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -21,7 +21,7 @@
  /**
  * @public
  */
-ItemBase.prototype.buildBase = function() {
+sosimplist.ItemBase.prototype.buildBase = function() {
     
     var self_ = this;
     if (self_.view_ === null) {
@@ -110,21 +110,21 @@ ItemBase.prototype.buildBase = function() {
             self_.view_.addEventListener(
                 'keyup',
                 function(event) {
-                    EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
+                    sosimplist.EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
                 },
                 false
             );
             self_.view_.addEventListener(
                 'keydown',
                 function(event) {
-                    EventStrategy.key.enter.stop(event);
+                    sosimplist.EventStrategy.key.enter.stop(event);
                 },
                 false
             );
             self_.view_.addEventListener(
                 'keypress',
                 function(event) {
-                    EventStrategy.key.enter.stop(event);
+                    sosimplist.EventStrategy.key.enter.stop(event);
                 },
                 false
             );
@@ -145,7 +145,7 @@ ItemBase.prototype.buildBase = function() {
 * @public
 * @return {object} return serialized object 
 */
-ItemBase.prototype.serializeBase = function() {
+sosimplist.ItemBase.prototype.serializeBase = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
@@ -158,7 +158,7 @@ ItemBase.prototype.serializeBase = function() {
  * @public
  * @param {object} obj serialized to decode
  */
-ItemBase.prototype.unserializeBase = function(obj) {
+sosimplist.ItemBase.prototype.unserializeBase = function(obj) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
         if (obj) {
@@ -180,7 +180,7 @@ ItemBase.prototype.unserializeBase = function(obj) {
   * @public
   * @return {element} return view as Element object to be placed in the view
   */
- ItemBase.prototype.getView = function() {
+ sosimplist.ItemBase.prototype.getView = function() {
     return this.view_;
  };
 
@@ -188,7 +188,7 @@ ItemBase.prototype.unserializeBase = function(obj) {
   * @public
   * @return {string} return item id
   */
- ItemBase.prototype.getId = function() {
+ sosimplist.ItemBase.prototype.getId = function() {
     return this.id_;
  };
 
@@ -196,14 +196,14 @@ ItemBase.prototype.unserializeBase = function(obj) {
   * @public
   * @return {bool} return if item is checked
   */
- ItemBase.prototype.isChecked = function() {
+ sosimplist.ItemBase.prototype.isChecked = function() {
     return this.checked_;
  };
 
 /**
   * @public
   */
- ItemBase.prototype.focus = function() {
+ sosimplist.ItemBase.prototype.focus = function() {
     try {
         var self_ = this;
         var el = document.getElementById('sosimplist-item-text' + self_.id_);
@@ -224,7 +224,7 @@ ItemBase.prototype.unserializeBase = function(obj) {
 * @private
 * @param {bool} check item or not
 */
-ItemBase.prototype.check_ = function(check) {
+sosimplist.ItemBase.prototype.check_ = function(check) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
 

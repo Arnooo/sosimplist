@@ -103,7 +103,7 @@ module.exports = function(grunt) {
                     dir : 'test/coverage/',
                      reporters: [
                      { type: 'html', subdir: 'report-html' },
-                     { type: 'lcov', subdir: 'report-lcov' },
+                     { type: 'lcov', subdir: 'report-lcov' }
                      ]
                 },
                 frameworks: ['jasmine']

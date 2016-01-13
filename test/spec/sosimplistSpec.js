@@ -1,24 +1,23 @@
-describe("Sosimplist", function() {
-  var sosimplist; 
+describe("sosimplist.Manager", function() {
 
   beforeEach(function() {
-    sosimplist = new Sosimplist();
+    sosimplist.mgr = Sosimplist_create(); 
     spyOn(console, 'error');
   });
 
   it("should be initialized", function() {
-    expect(sosimplist.getView()).toEqual(null);
-    expect(sosimplist.getId()).toEqual(sosimplist.viewId_);
+    expect(sosimplist.mgr.getView()).toEqual(null);
+    expect(sosimplist.mgr.getId()).toEqual(sosimplist.mgr.viewId_);
 
     //test addItem
-    expect(sosimplist.mapOfList_).toEqual({});
+    expect(sosimplist.mgr.mapOfList_).toEqual({});
   });
 
   describe("when view is builded", function() {
     beforeEach(function() {
       setFixtures('<div id=myView></div>');
       sosimplist.init('myView', {save:E_SAVE_IN.NONE});
-      setFixtures(sosimplist.getView());
+      setFixtures(sosimplist.mgr.getView());
     });
 
     it("should not initialized a second time the view calling buildView", function() {
@@ -28,9 +27,9 @@ describe("Sosimplist", function() {
 
     it("should initialized the view", function() {
 
-      expect(sosimplist.options_).toEqual({data:[],save:E_SAVE_IN.NONE, edit:true, checkable : true});
+      expect(sosimplist.mgr.options_).toEqual({data:[],save:E_SAVE_IN.NONE, edit:true, checkable : true});
 
-      expect(sosimplist.getView()).not.toEqual(null);
+      expect(sosimplist.mgr.getView()).not.toEqual(null);
       
       expect($('.sosimplist-container-list')).toBeInDOM(true);
       expect($('.sosimplist-container-list')).toEqual('div');
@@ -53,7 +52,7 @@ describe("Sosimplist", function() {
 
       it("should add list", function() {
         var count = 0;
-        for (var listId in sosimplist.mapOfList_) {
+        for (var listId in sosimplist.mgr.mapOfList_) {
             count++;
         }
         expect(count).toEqual(1);
@@ -67,7 +66,7 @@ describe("Sosimplist", function() {
 
         it("should remove all lists", function() {
           var count = 0;
-          for (var listId in sosimplist.mapOfList_) {
+          for (var listId in sosimplist.mgr.mapOfList_) {
               count++;
           }
           expect(count).toEqual(0);
@@ -78,7 +77,7 @@ describe("Sosimplist", function() {
 
     describe("when sosimplist is serialized", function() {
       it("should return a JSON object encoded which contains the main data", function() {
-        var data = sosimplist.serialize();
+        var data = sosimplist.mgr.serialize();
         var shouldBeData = [];
         expect(data).toEqual(JSON.stringify(shouldBeData));
       });
@@ -87,17 +86,17 @@ describe("Sosimplist", function() {
     describe("when sosimplist is unserialized", function() {
       it("should extract data and initialize the sosimplist object", function() {    
         var inputData = [];
-        sosimplist.unserialize(JSON.stringify(inputData));
-        expect(sosimplist.mapOfList_).toEqual({});
+        sosimplist.mgr.unserialize(JSON.stringify(inputData));
+        expect(sosimplist.mgr.mapOfList_).toEqual({});
       });
 
       it("should fail when we do send empty or corrupted data to extract in parameter", function() { 
-        sosimplist.unserialize({});
+        sosimplist.mgr.unserialize({});
         expect(console.error).toHaveBeenCalled();
       });
       
       it("should fail when we do not send data to extract in parameter", function() { 
-          sosimplist.unserialize();
+          sosimplist.mgr.unserialize();
           expect(console.error).toHaveBeenCalled();
       });
     });
@@ -108,11 +107,11 @@ describe("Sosimplist", function() {
     beforeEach(function() {
       setFixtures('<div id=myView></div>');
       sosimplist.init('myView', {edit:false});
-      setFixtures(sosimplist.getView());
+      setFixtures(sosimplist.mgr.getView());
     });
 
     it("should init list mangager with correct options", function() {
-      expect(sosimplist.options_.edit).toEqual(false);
+      expect(sosimplist.mgr.options_.edit).toEqual(false);
     });
 
   });
@@ -121,7 +120,7 @@ describe("Sosimplist", function() {
     beforeEach(function() {
       setFixtures('<div id=myView></div>');
       sosimplist.init('myView', {patate:'frite'});
-      setFixtures(sosimplist.getView());
+      setFixtures(sosimplist.mgr.getView());
     });
 
     it("should fail", function() {

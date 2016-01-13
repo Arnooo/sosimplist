@@ -17,7 +17,7 @@ var E_SAVE_IN = {
  * @private
  * @constructor
  */
-function Sosimplist() {
+sosimplist.Manager = function() {
     /** @private */
     var self_ = this;
     self_.sosimplistId_ = new Date().getTime();
@@ -37,7 +37,7 @@ function Sosimplist() {
  * @param {string} viewId is the element Id where to display the list manager
  * @param {object} options is used to configure the list manager
  */
-Sosimplist.prototype.init = function(viewId, options) {
+sosimplist.Manager.prototype.init = function(viewId, options) {
     try {
         var self_ = this;
         if (self_.view_ === null) {
@@ -71,11 +71,13 @@ Sosimplist.prototype.init = function(viewId, options) {
             }
             self_.unserialize(dataToUnserialize);
 
-            /// @TODO clear all elment in the view before adding ours
-            //self_.view_
-
             //build view
             self_.view_ = document.getElementById(this.viewId_);
+
+            //Display warning on not empty view
+            if(self_.view_ && self_.view_.children.length > 0){
+                console.warning("Sosimplist will append all lists at the end of the element ID = '"+self_.viewId_+"'!");
+            }
             self_.view_.className += 'sosimplist';
             self_.view_.addEventListener(
                  'keyup',
@@ -238,7 +240,7 @@ Sosimplist.prototype.init = function(viewId, options) {
  * @public
  * @return {string} return content serialize in a JSON object
  */
-Sosimplist.prototype.serialize = function() {
+sosimplist.Manager.prototype.serialize = function() {
     var self_ = this;
     var content = [];
     for (var listId in self_.mapOfList_) {
@@ -252,14 +254,14 @@ Sosimplist.prototype.serialize = function() {
  * @public
  * @param {string} str content serialized in a JSON object
  */
-Sosimplist.prototype.unserialize = function(str) {
+sosimplist.Manager.prototype.unserialize = function(str) {
     try {
         var self_ = this;
         if(str){
             var content = JSON.parse(str);
             self_.mapOfList_ = {};
             for (var i = 0; i < content.length; i++) {
-                var myList = new List(self_.options_);
+                var myList = new sosimplist.List(self_.options_);
                 content[i].id_ = content[i].id_ ? content[i].id_ : myList.getId()+i ;
                 myList.unserialize(content[i]);
                 myList.buildView();
@@ -280,10 +282,10 @@ Sosimplist.prototype.unserialize = function(str) {
 /**
  * @public
  */
-Sosimplist.prototype.addList = function() {
+sosimplist.Manager.prototype.addList = function() {
     try {
         var self_ = this;
-        var myList = new List(self_.options_);
+        var myList = new sosimplist.List(self_.options_);
         myList.buildView();
         self_.listContainer_.appendChild(myList.getView());
         self_.mapOfList_[myList.getId()] = myList;
@@ -296,7 +298,7 @@ Sosimplist.prototype.addList = function() {
 /**
  * @public
  */
-Sosimplist.prototype.clearAll = function() {
+sosimplist.Manager.prototype.clearAll = function() {
     try {
         var self_ = this;
         self_.mapOfList_ = {};
@@ -316,7 +318,7 @@ Sosimplist.prototype.clearAll = function() {
   * @public
   * @return {string} return view as Element object to be placed in the DOM
   */
- Sosimplist.prototype.getView = function() {
+ sosimplist.Manager.prototype.getView = function() {
      return this.view_;
  };
 
@@ -324,7 +326,7 @@ Sosimplist.prototype.clearAll = function() {
 * @public
 * @return {string} return Sosimplist id
 */
-Sosimplist.prototype.getId = function() {
+sosimplist.Manager.prototype.getId = function() {
     return this.viewId_;
 };
 
@@ -332,7 +334,7 @@ Sosimplist.prototype.getId = function() {
  * @private
  * @param {string} viewId
  */
-Sosimplist.prototype.updateLocation_ = function(viewId) {
+sosimplist.Manager.prototype.updateLocation_ = function(viewId) {
     var self_ = this;
     if (E_SAVE_IN.URL === self_.options_.save) {
         window.location.href = window.location.href.split('#')[0] + '#' + btoa(self_.serialize());
@@ -345,10 +347,23 @@ Sosimplist.prototype.updateLocation_ = function(viewId) {
  * @return {Object}
  */
 function Sosimplist_create() {
-    return new Sosimplist();
+    return new sosimplist.Manager();
 }
+/**
+ * @private
+ * Creating solsimplist manager
+ */
+sosimplist.mgr = Sosimplist_create(); 
 
-var sosimplist = Sosimplist_create();
+/**
+ * @public
+ * @param {string} viewId is the element Id where to display the list manager
+ * @param {object} options is used to configure the list manager
+ */
+sosimplist.init = function(viewId, options){
+    var self_ = this;
+    self_.mgr.init(viewId, options);
+};
 
 
 

@@ -7,7 +7,7 @@
   * @constructor
   * @param {object} options is used to configure the list
   */
- function List(options) {
+ sosimplist.List = function(options) {
      var self_ = this;
      self_.options_ = options;
      self_.id_ = 'sosimplist-list' + (new Date().getTime());
@@ -25,7 +25,7 @@
  /**
  * @public
  */
-List.prototype.buildView = function() {
+sosimplist.List.prototype.buildView = function() {
     try {
         var self_ = this;
         if (self_.view_ === null) {
@@ -56,22 +56,22 @@ List.prototype.buildView = function() {
                  'keyup',
                  function() { 
                     var inputThis = this;
-                    EventStrategy.key.enter.stop(event);
-                    EventStrategy.key.not.enter.todo(event, function(){self_.title_ = inputThis.innerHTML;});
+                    sosimplist.EventStrategy.key.enter.stop(event);
+                    sosimplist.EventStrategy.key.not.enter.todo(event, function(){self_.title_ = inputThis.innerHTML;});
                  },
                  false
              );
              inputTitle.addEventListener(
                 'keydown',
                 function(event) {
-                    EventStrategy.key.enter.stop(event);
+                    sosimplist.EventStrategy.key.enter.stop(event);
                 },
                 false
             );
              inputTitle.addEventListener(
                 'keypress',
                 function(event) {
-                    EventStrategy.key.enter.stop(event);
+                    sosimplist.EventStrategy.key.enter.stop(event);
                 },
                 false
             );
@@ -241,7 +241,7 @@ List.prototype.buildView = function() {
 * @public
 * @return {object} return serialized object
 */
-List.prototype.serialize = function() {
+sosimplist.List.prototype.serialize = function() {
     try {
         var self_ = this;
         var content = {
@@ -265,14 +265,14 @@ List.prototype.serialize = function() {
  * @public
  * @param {object} obj content serialized to decode
  */
-List.prototype.unserialize = function(obj) {
+sosimplist.List.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
         self_.id_ = obj.id_;
         self_.title_ = obj.title;
         self_.mapOfItem_ = {};
         for (var i = 0; i < obj.items.length; i++) {
-            var myItem = itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
+            var myItem = sosimplist.itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
             obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
             myItem.unserialize(obj.items[i]);
             myItem.buildView();
@@ -288,7 +288,7 @@ List.prototype.unserialize = function(obj) {
 * @public
 * @return {string} return list id
 */
-List.prototype.getId = function() {
+sosimplist.List.prototype.getId = function() {
     return this.id_;
 };
 
@@ -297,10 +297,10 @@ List.prototype.getId = function() {
 * Add item to this list
 * @param {object} itemElementCurrent used as index to create the new item element.
 */
-List.prototype.addItem = function(itemElementCurrent) {
+sosimplist.List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = itemfactory.create('ItemText', self_, self_.options_);
+        var myItem = sosimplist.itemfactory.create('ItemText', self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
@@ -311,7 +311,10 @@ List.prototype.addItem = function(itemElementCurrent) {
                 self_.itemContainer_.appendChild(myItem.getView());
             }
             myItem.focus();
-        }else {}
+        }
+        else {
+            //Do nothing
+        }
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -323,7 +326,7 @@ List.prototype.addItem = function(itemElementCurrent) {
 * Remove given item from this list
 * @param {object} item
 */
-List.prototype.removeItem = function(item) {
+sosimplist.List.prototype.removeItem = function(item) {
     try {
         var self_ = this;
         if (self_.itemContainer_.contains(document.getElementById(item.getId()))) {
@@ -346,7 +349,7 @@ List.prototype.removeItem = function(item) {
 * Move given item to the right list container (checked container or default container)
 * @param {object} item
 */
-List.prototype.moveItem = function(item) {
+sosimplist.List.prototype.moveItem = function(item) {
     try {
         var self_ = this;
         if (item.isChecked()) {
@@ -367,7 +370,7 @@ List.prototype.moveItem = function(item) {
 * Insert new item after item given into parameter
 * @param {object} item used as reference to insert new item after.
 */
-List.prototype.insertItemAfter = function(item) {
+sosimplist.List.prototype.insertItemAfter = function(item) {
     try {
         var self_ = this;
         self_.addItem(document.getElementById(item.getId()));
@@ -383,7 +386,7 @@ List.prototype.insertItemAfter = function(item) {
 * @param {string} eventName
 * @param {object} data
 */
-List.prototype.dispatch = function(eventName, data) {
+sosimplist.List.prototype.dispatch = function(eventName, data) {
     try {
         var self_ = this;
         if (eventName === 'moveItem') {
@@ -408,14 +411,14 @@ List.prototype.dispatch = function(eventName, data) {
   * @public
   * @return {string} return view as Element object to be placed in the view
   */
- List.prototype.getView = function() {
+ sosimplist.List.prototype.getView = function() {
      return this.view_;
  };
 
  /**
   * @private
   */
- List.prototype.setVisibility_ = function() {
+ sosimplist.List.prototype.setVisibility_ = function() {
     try {
         var self_ = this;
          //hide/show list of item checked
