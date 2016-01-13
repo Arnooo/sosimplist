@@ -57,22 +57,18 @@ sosimplist.List.prototype.buildView = function() {
                  function() { 
                     var inputThis = this;
                     sosimplist.EventStrategy.key.enter.stop(event);
-                    sosimplist.EventStrategy.key.not.enter.todo(event, function(){self_.title_ = inputThis.innerHTML;});
+                    sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.title_ = inputThis.innerHTML;});
                  },
                  false
              );
              inputTitle.addEventListener(
                 'keydown',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
              inputTitle.addEventListener(
                 'keypress',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
              if (self_.title_ !== '') {

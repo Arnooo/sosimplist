@@ -29,7 +29,9 @@ sosimplist.ItemText.prototype.buildView = function() {
  */
 sosimplist.ItemText.prototype.serialize = function() {
     var self_ = this;
-    return self_.serializeBase();
+    dataSerialized = self_.serializeBase();
+    dataSerialized.type = 'Text';
+    return dataSerialized;
 };
 
 /**

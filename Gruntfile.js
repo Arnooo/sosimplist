@@ -25,18 +25,18 @@ module.exports = function(grunt) {
         },
         watch: {
             dev: {
-                files: ['src/*.js', 'test/**/*.js'],
+                files: ['src/*.js', 'test/**/*.js', 'index.html', 'style.css'],
                 tasks: ['build-dev']
             }
         },
         concat: {
             dev: {
                 src: ['src/*.js'],
-                dest: 'dist/<%= pkg.name %>.js',
+                dest: 'dist/<%= pkg.name %>.js'
             },
             prod: {
                 src: ['src/*.js'],
-                dest: 'dist/<%= pkg.name %>.js',
+                dest: 'dist/<%= pkg.name %>.js'
             }
         },
         uglify: {
@@ -63,6 +63,12 @@ module.exports = function(grunt) {
                         search: '<%= pkg.name %>.js',
                         replace: '<%= pkg.name %>.min.js',
                         flags: 'g'
+                    },
+                    {
+                        name: 'Comment Build time',
+                        search: '<p>Last auto build time: .*</p>',
+                        replace: '<!--<p>Last auto build time: </p>-->',
+                        flags: 'g'
                     }
                 ]
             },
@@ -79,6 +85,12 @@ module.exports = function(grunt) {
                         name: 'Lib <%= pkg.name %>',
                         search: '<%= pkg.name %>.min.js',
                         replace: '<%= pkg.name %>.js',
+                        flags: 'g'
+                    },
+                    {
+                        name: 'Build time',
+                        search: '(<!--)?<p>Last auto build time: .*</p>(-->)?',
+                        replace: '<p>Last auto build time: '+new Date().toLocaleString()+'</p>',
                         flags: 'g'
                     }
                 ]
@@ -113,7 +125,7 @@ module.exports = function(grunt) {
                 singleRun: false
             },
             test: {
-                singleRun: false,
+                singleRun: false
             },
             prod: {
                 singleRun: true

@@ -1,5 +1,69 @@
 // Defining sosimplist namespace
 var sosimplist = {};
+ /**
+  * @public
+  * @constructor
+  */
+ sosimplist.ElementFactory = function() {
+     var self_ = this;
+ }
+ 
+  
+ /**
+  * @public
+  * @param {string} elementType is the type of the item to be created by the factory
+  * @return {element} return the element asked
+  */
+ sosimplist.ElementFactory.prototype.create = function(elementType, options) {
+     if(elementType === 'selector'){
+        var divSelector = document.createElement('div');
+        divSelector.className = 'sosimplist-item-selector';
+        return divSelector;
+     }
+     else if(elementType === 'checkbox'){
+        var inputCheckbox = document.createElement('input');
+        inputCheckbox.className = 'sosimplist-item-checkbox';
+        inputCheckbox.type = 'checkbox';
+        inputCheckbox.checked = options.checked;
+        inputCheckbox.addEventListener('change', options.change, false);
+        return inputCheckbox;
+     }
+     else if(elementType === 'text'){
+        var inputText = document.createElement('div');
+        inputText.id = 'sosimplist-item-text' + options.id;
+        inputText.className = 'sosimplist-item-text sosimplist-editable';
+        //enable eddition
+        if (options.edit) {
+            inputText.contentEditable = true;
+        }
+        else {
+            inputText.className += ' sosimplist-edit-false';
+        }
+        inputText.setAttribute('placeholder', options.placeholder);
+        inputText.addEventListener('keyup', options.keyup, false);
+        inputText.innerHTML = options.text;
+        return inputText;
+     }
+     else if(elementType === 'delete'){
+        var divDelete = document.createElement('div');
+        divDelete.className = 'sosimplist-item-delete';
+        divDelete.addEventListener('click',options.click,false);
+        return divDelete;
+     }
+     else{
+         console.error('Element type = ' + elementType + ' not supported yet !');
+    }
+ }
+
+ /**
+ * @private
+ * @return {Object}
+ */
+function ElementFactory_create() {
+    return new sosimplist.ElementFactory();
+}
+
+sosimplist.elementfactory = ElementFactory_create();
 /**
  * Event strategy object
  * This object synthetise events function do execute
@@ -11,7 +75,7 @@ var sosimplist = {};
                 if(event.keyCode === 13){
                     event.preventDefault();
                     event.stopPropagation();
-                    if(done){done();};
+                    if(done){done()};
                 }
                 else{
                     //Do nothing
@@ -20,7 +84,7 @@ var sosimplist = {};
         },
         not:{
             enter:{
-                todo:function(event, done){
+                do:function(event, done){
                     if(event.keyCode !== 13 && done){
                         done();
                     }
@@ -63,23 +127,16 @@ sosimplist.ItemBase.prototype.buildBase = function() {
         self_.view_.id = self_.id_;
         self_.view_.className = 'sosimplist-item';
 
-        if (self_.options_.edit) {
-            var divSelector = document.createElement('div');
-            divSelector.className = 'sosimplist-item-selector';
-            self_.view_.appendChild(divSelector);
-        }
-        else {
-            //Do nothing
-        }
+        //Initialize layout
+        var layout = [];
 
-        var inputCheckbox = document.createElement('input');
-        inputCheckbox.className = 'sosimplist-item-checkbox';
-        inputCheckbox.type = 'checkbox';
-        inputCheckbox.addEventListener(
-            'change',
-            function() {
+        //Add checkbox to the layout
+        var inputCheckbox = sosimplist.elementfactory.create(
+         'checkbox',
+         { 
+            checked:self_.checked_,
+            change:function() {
                 self_.check_(this.checked);
-
                 if (self_.parent_) {
                     //move item to the right container
                     self_.parent_.dispatch('moveItem', self_);
@@ -87,84 +144,69 @@ sosimplist.ItemBase.prototype.buildBase = function() {
                 else {
                     //Do nothing
                 }
-            },
-            false
-        );
-        inputCheckbox.checked = self_.checked_;
-        self_.view_.appendChild(inputCheckbox);
+            }
+        });
+        layout.push(inputCheckbox);
 
-        var inputText = document.createElement('div');
-        inputText.id = 'sosimplist-item-text' + self_.id_;
-        inputText.className = 'sosimplist-item-text sosimplist-editable';
-        //enable eddition
-        if (self_.options_.edit) {
-            inputText.contentEditable = true;
-        }
-        else {
-            inputText.className += ' sosimplist-edit-false';
-        }
-        inputText.setAttribute('placeholder', 'write something');
-        inputText.addEventListener(
-            'keyup',
-            function(event) {
-                if (event.keyCode !== 13) {
-                    self_.text_ = this.innerHTML;
-                }
-                else {
-                    //Do nothing
-                }
+        //Add text element to the layout
+        var inputText = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: self_.id_,
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});
             },
-            false
-        );
-        if (self_.text_ !== '') {
-            inputText.innerHTML = self_.text_;
-        }
-        else {
-            //Do nothing
-        }
-        self_.view_.appendChild(inputText);
+            text: self_.text_,
+            placeholder:'write something',
+            edit: self_.options_.edit
+        });
+        layout.push(inputText);
 
+        //Add others element depending on edit option
         if (self_.options_.edit) {
-            var divDelete = document.createElement('div');
-            divDelete.className = 'sosimplist-item-delete';
-            divDelete.addEventListener(
-                'click',
-                function() {
+            //Add selector at the begining of the layout
+            layout.unshift(sosimplist.elementfactory.create('selector'));
+
+            //Add delete tick at the end of the layout
+            var divDelete = sosimplist.elementfactory.create(
+            'delete',
+            {
+                click:function() {
                     if (self_.parent_) {
                         self_.parent_.dispatch('removeItem', self_);
                     }
                     else {
                         //Do nothing
                     }
-                },
-                false
-            );
-            self_.view_.appendChild(divDelete);
+                }
+            });
+            layout.push(divDelete);
 
             self_.view_.addEventListener(
                 'keyup',
-                function(event) {
+                function(event){
                     sosimplist.EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
                 },
                 false
             );
             self_.view_.addEventListener(
                 'keydown',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
             self_.view_.addEventListener(
                 'keypress',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
         }
         else {
             //Do nothing
+        }
+
+        for(var i = 0; i < layout.length; i++){
+            self_.view_.appendChild(layout[i]);
         }
 
         //Customize view depending on private members
@@ -364,7 +406,9 @@ sosimplist.ItemText.prototype.buildView = function() {
  */
 sosimplist.ItemText.prototype.serialize = function() {
     var self_ = this;
-    return self_.serializeBase();
+    dataSerialized = self_.serializeBase();
+    dataSerialized.type = 'Text';
+    return dataSerialized;
 };
 
 /**
@@ -403,20 +447,18 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
     self_.buildBase();
     var itemBaseView = self_.view_;
     if (itemBaseView) {
-        var inputComment = document.createElement('div');
-        inputComment.id = 'sosimplist-item-text' + self_.id_;
-        inputComment.className = 'sosimplist-item-text sosimplist-editable';
-        //enable eddition
-        if (self_.options_.edit) {
-            inputComment.contentEditable = true;
-        }
-        else {
-            inputComment.className += ' sosimplist-edit-false';
-        }
-        inputComment.setAttribute('placeholder', 'write a comment');
-        if (self_.comment_ !== '') {
-            inputComment.innerHTML = self_.comment_;
-        }else {}
+        var inputComment = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: self_.id_,
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.comment_ = inputThis.innerHTML;});
+            },
+            text: self_.comment_,
+            placeholder:'write a comment',
+            edit: self_.options_.edit
+        });
         itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
     }
     else {
@@ -430,7 +472,10 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
  */
 sosimplist.ItemTextComment.prototype.serialize = function() {
     var self_ = this;
-    return self_.serializeBase();
+    var dataSerialized = self_.serializeBase();
+    dataSerialized.comment = self_.comment_;
+    dataSerialized.type = 'TextComment';
+    return dataSerialized;
 };
 
 /**
@@ -513,22 +558,18 @@ sosimplist.List.prototype.buildView = function() {
                  function() { 
                     var inputThis = this;
                     sosimplist.EventStrategy.key.enter.stop(event);
-                    sosimplist.EventStrategy.key.not.enter.todo(event, function(){self_.title_ = inputThis.innerHTML;});
+                    sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.title_ = inputThis.innerHTML;});
                  },
                  false
              );
              inputTitle.addEventListener(
                 'keydown',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
              inputTitle.addEventListener(
                 'keypress',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
              if (self_.title_ !== '') {

@@ -9,7 +9,7 @@
                 if(event.keyCode === 13){
                     event.preventDefault();
                     event.stopPropagation();
-                    if(done){done();};
+                    if(done){done()};
                 }
                 else{
                     //Do nothing
@@ -18,7 +18,7 @@
         },
         not:{
             enter:{
-                todo:function(event, done){
+                do:function(event, done){
                     if(event.keyCode !== 13 && done){
                         done();
                     }

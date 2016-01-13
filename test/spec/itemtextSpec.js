@@ -113,7 +113,8 @@ describe("ItemText", function() {
         var data = itemtext.serialize();
         var shouldBeData = {
             checked: itemtext.checked_,
-            text: itemtext.text_
+            text: itemtext.text_,
+            type: 'Text'
         };
         expect(data).toEqual(shouldBeData);
       });

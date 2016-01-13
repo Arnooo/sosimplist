@@ -25,20 +25,18 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
     self_.buildBase();
     var itemBaseView = self_.view_;
     if (itemBaseView) {
-        var inputComment = document.createElement('div');
-        inputComment.id = 'sosimplist-item-text' + self_.id_;
-        inputComment.className = 'sosimplist-item-text sosimplist-editable';
-        //enable eddition
-        if (self_.options_.edit) {
-            inputComment.contentEditable = true;
-        }
-        else {
-            inputComment.className += ' sosimplist-edit-false';
-        }
-        inputComment.setAttribute('placeholder', 'write a comment');
-        if (self_.comment_ !== '') {
-            inputComment.innerHTML = self_.comment_;
-        }else {}
+        var inputComment = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: self_.id_,
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.comment_ = inputThis.innerHTML;});
+            },
+            text: self_.comment_,
+            placeholder:'write a comment',
+            edit: self_.options_.edit
+        });
         itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
     }
     else {
@@ -52,7 +50,10 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
  */
 sosimplist.ItemTextComment.prototype.serialize = function() {
     var self_ = this;
-    return self_.serializeBase();
+    var dataSerialized = self_.serializeBase();
+    dataSerialized.comment = self_.comment_;
+    dataSerialized.type = 'TextComment';
+    return dataSerialized;
 };
 
 /**

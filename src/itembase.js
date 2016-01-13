@@ -29,23 +29,16 @@ sosimplist.ItemBase.prototype.buildBase = function() {
         self_.view_.id = self_.id_;
         self_.view_.className = 'sosimplist-item';
 
-        if (self_.options_.edit) {
-            var divSelector = document.createElement('div');
-            divSelector.className = 'sosimplist-item-selector';
-            self_.view_.appendChild(divSelector);
-        }
-        else {
-            //Do nothing
-        }
+        //Initialize layout
+        var layout = [];
 
-        var inputCheckbox = document.createElement('input');
-        inputCheckbox.className = 'sosimplist-item-checkbox';
-        inputCheckbox.type = 'checkbox';
-        inputCheckbox.addEventListener(
-            'change',
-            function() {
+        //Add checkbox to the layout
+        var inputCheckbox = sosimplist.elementfactory.create(
+         'checkbox',
+         { 
+            checked:self_.checked_,
+            change:function() {
                 self_.check_(this.checked);
-
                 if (self_.parent_) {
                     //move item to the right container
                     self_.parent_.dispatch('moveItem', self_);
@@ -53,84 +46,69 @@ sosimplist.ItemBase.prototype.buildBase = function() {
                 else {
                     //Do nothing
                 }
-            },
-            false
-        );
-        inputCheckbox.checked = self_.checked_;
-        self_.view_.appendChild(inputCheckbox);
+            }
+        });
+        layout.push(inputCheckbox);
 
-        var inputText = document.createElement('div');
-        inputText.id = 'sosimplist-item-text' + self_.id_;
-        inputText.className = 'sosimplist-item-text sosimplist-editable';
-        //enable eddition
-        if (self_.options_.edit) {
-            inputText.contentEditable = true;
-        }
-        else {
-            inputText.className += ' sosimplist-edit-false';
-        }
-        inputText.setAttribute('placeholder', 'write something');
-        inputText.addEventListener(
-            'keyup',
-            function(event) {
-                if (event.keyCode !== 13) {
-                    self_.text_ = this.innerHTML;
-                }
-                else {
-                    //Do nothing
-                }
+        //Add text element to the layout
+        var inputText = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: self_.id_,
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});
             },
-            false
-        );
-        if (self_.text_ !== '') {
-            inputText.innerHTML = self_.text_;
-        }
-        else {
-            //Do nothing
-        }
-        self_.view_.appendChild(inputText);
+            text: self_.text_,
+            placeholder:'write something',
+            edit: self_.options_.edit
+        });
+        layout.push(inputText);
 
+        //Add others element depending on edit option
         if (self_.options_.edit) {
-            var divDelete = document.createElement('div');
-            divDelete.className = 'sosimplist-item-delete';
-            divDelete.addEventListener(
-                'click',
-                function() {
+            //Add selector at the begining of the layout
+            layout.unshift(sosimplist.elementfactory.create('selector'));
+
+            //Add delete tick at the end of the layout
+            var divDelete = sosimplist.elementfactory.create(
+            'delete',
+            {
+                click:function() {
                     if (self_.parent_) {
                         self_.parent_.dispatch('removeItem', self_);
                     }
                     else {
                         //Do nothing
                     }
-                },
-                false
-            );
-            self_.view_.appendChild(divDelete);
+                }
+            });
+            layout.push(divDelete);
 
             self_.view_.addEventListener(
                 'keyup',
-                function(event) {
+                function(event){
                     sosimplist.EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
                 },
                 false
             );
             self_.view_.addEventListener(
                 'keydown',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
             self_.view_.addEventListener(
                 'keypress',
-                function(event) {
-                    sosimplist.EventStrategy.key.enter.stop(event);
-                },
+                sosimplist.EventStrategy.key.enter.stop,
                 false
             );
         }
         else {
             //Do nothing
+        }
+
+        for(var i = 0; i < layout.length; i++){
+            self_.view_.appendChild(layout[i]);
         }
 
         //Customize view depending on private members
