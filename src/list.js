@@ -78,7 +78,7 @@ sosimplist.List.prototype.buildView = function() {
                     sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.title_ = inputThis.innerHTML;});
                 },
                 text: self_.title_,
-                placeholder:'Title',
+                placeholder: sosimplist.translate('Title'),
                 edit: self_.options_.edit
              });
              listContent.appendChild(inputTitle);
@@ -118,7 +118,7 @@ sosimplist.List.prototype.buildView = function() {
              if (self_.options_.edit) {
                  var buttonAddItem = sosimplist.elementfactory.create('button', {
                     id: 'sosimplist-button-add-item',
-                    value: 'Add item',
+                    value: sosimplist.translate('Add item'),
                     click: function() {self_.addItem();}
                  });
                  listContent.appendChild(buttonAddItem);
@@ -144,7 +144,7 @@ sosimplist.List.prototype.buildView = function() {
              dropdownList.appendChild(pin);
              var pinLabel = document.createElement('label');
              pinLabel.className = 'sosimplist-list-pin-label';
-             pinLabel.innerHTML = 'Selected items';
+             pinLabel.innerHTML = sosimplist.translate('Selected items');
              dropdownList.appendChild(pinLabel);
              listContent.appendChild(dropdownList);
 

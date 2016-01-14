@@ -1,5 +1,22 @@
 // Defining sosimplist namespace
 var sosimplist = {};
+///
+//Utils function to do stuff
+
+sosimplist.stringToFunction = function(str) {
+  var arr = str.split(".");
+
+  var fn = (window || this);
+  for (var i = 0, len = arr.length; i < len; i++) {
+    fn = fn[arr[i]];
+  }
+
+  if (typeof fn !== "function") {
+    throw new Error("function not found");
+  }
+
+  return  fn;
+};
  /**
   * @public
   * @constructor
@@ -263,7 +280,7 @@ sosimplist.ItemBase.prototype.buildBase = function() {
                 sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});
             },
             text: self_.text_,
-            placeholder:'write something',
+            placeholder: sosimplist.translate('write something'),
             edit: self_.options_.edit
         });
         layout.push(inputText);
@@ -565,7 +582,12 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
             placeholder:'write a comment',
             edit: self_.options_.edit
         });
-        itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+        if(self_.options_.edit){
+            itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+        }
+        else {
+            itemBaseView.appendChild(inputComment);
+        }
     }
     else {
        console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
@@ -685,7 +707,7 @@ sosimplist.List.prototype.buildView = function() {
                     sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.title_ = inputThis.innerHTML;});
                 },
                 text: self_.title_,
-                placeholder:'Title',
+                placeholder: sosimplist.translate('Title'),
                 edit: self_.options_.edit
              });
              listContent.appendChild(inputTitle);
@@ -725,7 +747,7 @@ sosimplist.List.prototype.buildView = function() {
              if (self_.options_.edit) {
                  var buttonAddItem = sosimplist.elementfactory.create('button', {
                     id: 'sosimplist-button-add-item',
-                    value: 'Add item',
+                    value: sosimplist.translate('Add item'),
                     click: function() {self_.addItem();}
                  });
                  listContent.appendChild(buttonAddItem);
@@ -751,7 +773,7 @@ sosimplist.List.prototype.buildView = function() {
              dropdownList.appendChild(pin);
              var pinLabel = document.createElement('label');
              pinLabel.className = 'sosimplist-list-pin-label';
-             pinLabel.innerHTML = 'Selected items';
+             pinLabel.innerHTML = sosimplist.translate('Selected items');
              dropdownList.appendChild(pinLabel);
              listContent.appendChild(dropdownList);
 
@@ -1017,6 +1039,8 @@ sosimplist.Manager = function() {
     self_.view_ = null;
     self_.mapOfList_ = {};
     self_.options_ = {
+        translationModule:'sosimplist.DefaultTranslationModule',
+        lang:'en',
         data: [],
         save: E_SAVE_IN.URL,
         edit: true, // edit / remove / add
@@ -1046,6 +1070,12 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
                         throw new Error('Option = ' + opt + ' options[opt] = ' + options[opt] + ', does not exist in this version!');
                     }
                 }
+            }
+
+            // Load translation module
+            if(self_.options_.translationModule && self_.options_.lang){
+                var TranslationModule = sosimplist.stringToFunction(self_.options_.translationModule);
+                sosimplist.translationModule = new TranslationModule({lang:self_.options_.lang});
             }
 
             // load data 
@@ -1117,14 +1147,14 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
             if (self_.options_.edit) {
                 var buttonAddList = sosimplist.elementfactory.create('button', {
                     id: 'sosimplist-button-add-list',
-                    value: 'Add list',
+                    value: sosimplist.translate('Add list'),
                     click: function() {self_.addList();}
                 });
                 self_.view_.appendChild(buttonAddList);
 
                 var buttonClear = sosimplist.elementfactory.create('button', {
                     id: 'sosimplist-button-clear',
-                    value: 'Clear',
+                    value: sosimplist.translate('Clear'),
                     click: function() {self_.clearAll();}
                 });
                 self_.view_.appendChild(buttonClear);
@@ -1273,3 +1303,45 @@ sosimplist.init = function(viewId, options){
 
 
 
+
+ 
+sosimplist.translationModule = null;
+
+// Default translation 
+sosimplist.DefaultTranslationModule = function(options){
+    var self_ = this;
+    self_.lang_ = options.lang;
+    self_.text_ = {
+        fr:{
+            'Title': 'Titre',
+            'Add item': 'Ajouter une élément',
+            'Selected items': 'Eléments sélectionnés',
+            'Add list': 'Ajouter une liste',
+            'Clear': 'Tout supprimer'
+        }
+    }
+}
+
+sosimplist.DefaultTranslationModule.prototype.translate = function(toTranslate){
+    var self_ = this;
+    if(self_.text_ && self_.text_[self_.lang_] && self_.text_[self_.lang_][toTranslate]){
+        return self_.text_[self_.lang_][toTranslate];
+    }
+    else{
+        return toTranslate;
+    }
+}
+
+ /**
+  * @public
+  * @param {string} toTranslate
+  */
+sosimplist.translate = function(toTranslate){
+    var self_ = this;
+    if(self_.translationModule){
+        return self_.translationModule.translate(toTranslate);
+    }
+    else{
+        return toTranslate;
+    }
+}

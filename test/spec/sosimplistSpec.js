@@ -27,7 +27,13 @@ describe("sosimplist.Manager", function() {
 
     it("should initialized the view", function() {
 
-      expect(sosimplist.mgr.options_).toEqual({data:[],save:E_SAVE_IN.NONE, edit:true, checkable : true});
+      expect(sosimplist.mgr.options_).toEqual({
+        translationModule: 'sosimplist.DefaultTranslationModule',
+        lang:'en',
+        data:[],
+        save:E_SAVE_IN.NONE, 
+        edit:true, 
+        checkable : true});
 
       expect(sosimplist.mgr.getView()).not.toEqual(null);
       

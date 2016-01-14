@@ -25,6 +25,8 @@ sosimplist.Manager = function() {
     self_.view_ = null;
     self_.mapOfList_ = {};
     self_.options_ = {
+        translationModule:'sosimplist.DefaultTranslationModule',
+        lang:'en',
         data: [],
         save: E_SAVE_IN.URL,
         edit: true, // edit / remove / add
@@ -54,6 +56,12 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
                         throw new Error('Option = ' + opt + ' options[opt] = ' + options[opt] + ', does not exist in this version!');
                     }
                 }
+            }
+
+            // Load translation module
+            if(self_.options_.translationModule && self_.options_.lang){
+                var TranslationModule = sosimplist.stringToFunction(self_.options_.translationModule);
+                sosimplist.translationModule = new TranslationModule({lang:self_.options_.lang});
             }
 
             // load data 
@@ -125,14 +133,14 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
             if (self_.options_.edit) {
                 var buttonAddList = sosimplist.elementfactory.create('button', {
                     id: 'sosimplist-button-add-list',
-                    value: 'Add list',
+                    value: sosimplist.translate('Add list'),
                     click: function() {self_.addList();}
                 });
                 self_.view_.appendChild(buttonAddList);
 
                 var buttonClear = sosimplist.elementfactory.create('button', {
                     id: 'sosimplist-button-clear',
-                    value: 'Clear',
+                    value: sosimplist.translate('Clear'),
                     click: function() {self_.clearAll();}
                 });
                 self_.view_.appendChild(buttonClear);

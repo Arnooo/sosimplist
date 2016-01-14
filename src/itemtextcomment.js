@@ -38,7 +38,12 @@ sosimplist.ItemTextComment.prototype.buildView = function() {
             placeholder:'write a comment',
             edit: self_.options_.edit
         });
-        itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+        if(self_.options_.edit){
+            itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+        }
+        else {
+            itemBaseView.appendChild(inputComment);
+        }
     }
     else {
        console.error('Item simple ID = ' + self_.id_ + ', View already builded !');

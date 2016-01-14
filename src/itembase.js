@@ -61,7 +61,7 @@ sosimplist.ItemBase.prototype.buildBase = function() {
                 sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});
             },
             text: self_.text_,
-            placeholder:'write something',
+            placeholder: sosimplist.translate('write something'),
             edit: self_.options_.edit
         });
         layout.push(inputText);
