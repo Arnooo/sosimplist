@@ -36,23 +36,35 @@ sosimplist.List.prototype.buildView = function() {
              self_.view_.style.display = 'table';
 
              if (self_.options_.edit) {
-                self_.view_.draggable = true;
+                self_.view_.draggable = false; //drag list disabled
              }
              else {
                 self_.view_.className += ' sosimplist-edit-false';
              }
 
-             if(self_.image_){
-                 var imgElement = sosimplist.elementfactory.create('image', {
-                    src: self_.image_.src
-                 });
-                 self_.view_.appendChild(imgElement);
-             }
-
              var listContent = document.createElement('div');
              listContent.className = 'sosimplist-list-content';
              listContent.style.display = 'table-cell';
-             self_.view_.appendChild(listContent);
+
+             if(self_.image_){
+                 var imgElement = sosimplist.elementfactory.create('image', {
+                    position: self_.image_.position,
+                    src: self_.image_.src
+                 });
+                 if(self_.image_.position === 'bottom' ||
+                    self_.image_.position === 'right'){
+                    self_.view_.appendChild(listContent);
+                    self_.view_.appendChild(imgElement);
+                 }
+                 // Default image set to Top of the list
+                 else{
+                    self_.view_.appendChild(imgElement);
+                    self_.view_.appendChild(listContent);
+                 }
+             }
+             else {
+                self_.view_.appendChild(listContent);
+             }
 
              //Add text element, used for the list title, to the layout
             var inputTitle = sosimplist.elementfactory.create(
@@ -104,16 +116,11 @@ sosimplist.List.prototype.buildView = function() {
              listContent.appendChild(self_.itemContainer_);
 
              if (self_.options_.edit) {
-                 var buttonAddItem = document.createElement('input');
-                 buttonAddItem.id = 'sosimplist-button-add-item';
-                 buttonAddItem.className = 'sosimplist-button';
-                 buttonAddItem.type = 'button';
-                 buttonAddItem.value = 'Add item';
-                 buttonAddItem.addEventListener(
-                     'click',
-                     function() { self_.addItem(); },
-                     false
-                 );
+                 var buttonAddItem = sosimplist.elementfactory.create('button', {
+                    id: 'sosimplist-button-add-item',
+                    value: 'Add item',
+                    click: function() {self_.addItem();}
+                 });
                  listContent.appendChild(buttonAddItem);
              }
              else {

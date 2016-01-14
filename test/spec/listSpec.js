@@ -47,7 +47,7 @@ describe("List", function() {
       
       expect($('.sosimplist-list')).toBeInDOM(true);
       expect($('.sosimplist-list')).toEqual('div');
-      expect($('.sosimplist-list')).toHaveAttr('draggable', 'true');
+      expect($('.sosimplist-list')).toHaveAttr('draggable', 'false');
 
       expect($('.sosimplist-title')).toBeInDOM(true);
       expect($('.sosimplist-title')).toEqual('div');

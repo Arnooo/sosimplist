@@ -59,15 +59,32 @@
         return divDelete;
      }
      else if(elementType === 'image'){
-        var divImg = document.createElement('div');
-        divImg.style.display = 'table-row';
-        divImg.className = 'sosimplist-list-row';
         var imgElement = document.createElement('img');
         imgElement.className = 'sosimplist-list-image';
-        imgElement.style.display = 'table-cell';s
+        imgElement.style.display = 'table-cell';
         imgElement.src = options.src;
-        divImg.appendChild(imgElement);
-        return divImg;
+        if(options.position === 'top' ||
+           options.position === 'bottom'){
+            var divImg = document.createElement('div');
+            divImg.style.display = 'table-row';
+            divImg.className = 'sosimplist-list-row';
+            divImg.appendChild(imgElement);
+            return divImg;
+        }
+        else {
+          imgElement.style.height = '100%';
+          return imgElement;
+        }
+        
+     }
+     else if(elementType === 'button'){
+        var buttonElement = document.createElement('input');
+        buttonElement.type = 'button';
+        buttonElement.className = 'sosimplist-button';
+        buttonElement.id = options.id;
+        buttonElement.value = options.value;
+        buttonElement.addEventListener('click', options.click, false);
+        return buttonElement;
      }
      else{
          console.error('Element type = ' + elementType + ' not supported yet !');
