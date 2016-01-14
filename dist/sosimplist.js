@@ -1,15 +1,216 @@
+// Defining sosimplist namespace
+var sosimplist = {};
+ /**
+  * @public
+  * @constructor
+  */
+ sosimplist.ElementFactory = function() {
+     var self_ = this;
+ }
+ 
+  
+ /**
+  * @public
+  * @param {string} elementType is the type of the item to be created by the factory
+  * @return {element} return the element asked
+  */
+ sosimplist.ElementFactory.prototype.create = function(elementType, options) {
+     if(elementType === 'selector'){
+        var divSelector = document.createElement('div');
+        divSelector.className = 'sosimplist-item-selector';
+        return divSelector;
+     }
+     else if(elementType === 'checkbox'){
+        var inputCheckbox = document.createElement('input');
+        inputCheckbox.className = 'sosimplist-item-checkbox';
+        inputCheckbox.type = 'checkbox';
+        inputCheckbox.checked = options.checked;
+        inputCheckbox.addEventListener('change', options.change, false);
+        return inputCheckbox;
+     }
+     else if(elementType === 'text'){
+        var inputText = document.createElement('div');
+        inputText.id = options.id;
+        inputText.className = options.className+' sosimplist-editable';
+        //enable eddition
+        if (options.edit) {
+            inputText.contentEditable = true;
+        }
+        else {
+            inputText.className += ' sosimplist-edit-false';
+        }
+        inputText.setAttribute('placeholder', options.placeholder);
+        inputText.addEventListener('keyup', options.keyup, false);
+        inputText.addEventListener(
+          'keydown',
+          sosimplist.EventStrategy.key.enter.stop,
+          false
+        );
+        inputText.addEventListener(
+          'keypress',
+          sosimplist.EventStrategy.key.enter.stop,
+          false
+        );
+        inputText.innerHTML = options.text;
+        return inputText;
+     }
+     else if(elementType === 'delete'){
+        var divDelete = document.createElement('div');
+        divDelete.className = 'sosimplist-item-delete';
+        divDelete.addEventListener('click',options.click,false);
+        return divDelete;
+     }
+     else if(elementType === 'image'){
+        var imgElement = document.createElement('img');
+        imgElement.className = 'sosimplist-list-image';
+        imgElement.style.display = 'table-cell';
+        imgElement.src = options.src;
+        if(options.position === 'top' ||
+           options.position === 'bottom'){
+            var divImg = document.createElement('div');
+            divImg.style.display = 'table-row';
+            divImg.className = 'sosimplist-list-row';
+            divImg.appendChild(imgElement);
+            return divImg;
+        }
+        else {
+          imgElement.style.height = '100%';
+          return imgElement;
+        }
+        
+     }
+     else if(elementType === 'button'){
+        var buttonElement = document.createElement('input');
+        buttonElement.type = 'button';
+        buttonElement.className = 'sosimplist-button';
+        buttonElement.id = options.id;
+        buttonElement.value = options.value;
+        buttonElement.addEventListener('click', options.click, false);
+        return buttonElement;
+     }
+     else{
+         console.error('Element type = ' + elementType + ' not supported yet !');
+    }
+ }
+
+ /**
+ * @private
+ * @return {Object}
+ */
+function ElementFactory_create() {
+    return new sosimplist.ElementFactory();
+}
+
+sosimplist.elementfactory = ElementFactory_create();
 /**
- * Item simple object
+ * Event strategy object
+ * This object synthetise events function do execute
+ */
+ sosimplist.EventStrategy = {
+    key:{
+        enter:{
+            stop:function(event, done){
+                if(event.keyCode === 13){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if(done){done()};
+                }
+                else{
+                    //Do nothing
+                }
+            }
+        },
+        not:{
+            enter:{
+                do:function(event, done){
+                    if(event.keyCode !== 13 && done){
+                        done();
+                    }
+                    else{
+                        //Do nothing
+                    }
+                }
+            }
+        }
+    },
+    dragstart:function(event, opt) {
+        var dragData = null;
+        if (event.target.classList.contains(opt.source)) {
+            var parentToDrag = event.target.closest(opt.closest);
+            parentToDrag.style.zIndex = 1;
+            parentToDrag.style.boxShadow = '3px 3px 3px grey';
+            dragData = {
+                elementId: parentToDrag.id,
+                source: opt.source
+            };
+
+            var mask = document.createElement('div');
+            mask.id = 'mask';
+            mask.style.backgroundColor = 'red'; //To check if opacity is working
+            mask.style.opacity = 0; // Should be not visible with opacity = 0
+            mask.style.width = parentToDrag.clientWidth;
+            mask.style.height = parentToDrag.clientHeight;
+            mask.style.cursor = 'move';
+            document.body.appendChild(mask);
+            event.dataTransfer.setDragImage(mask, 0, 0);
+        }
+        else {
+            //Do nothing
+        }
+        return dragData;
+    },
+    dragenter:function(event, dragData, opt) {
+        event.preventDefault();
+        if (dragData && dragData.source === opt.source) {
+            var elementDragged = document.getElementById(dragData.elementId);
+            var parentTarget = event.target.closest(opt.closest);
+            if (elementDragged && parentTarget) {
+                var isContainInThisList = parentTarget.parentNode.contains(elementDragged);
+                if (isContainInThisList) {
+                    elementDragged.nextSibling === parentTarget ?
+                    elementDragged.parentNode.insertBefore(elementDragged, parentTarget.nextSibling) :
+                    elementDragged.parentNode.insertBefore(elementDragged, parentTarget);
+                }
+                else {
+                    //Do nothing
+                }
+            }
+            else {
+                //Do nothing
+            }
+        }
+        else {
+            //Do nothing
+        }
+    },
+    drop:function(event, dragData, opt) {
+        if (dragData && dragData.source === opt.source) {
+            var elementDragged = document.getElementById(dragData.elementId);
+            if (elementDragged) {
+                document.body.removeChild(document.getElementById('mask'));
+                elementDragged.style.boxShadow = '';
+                elementDragged.style.zIndex = '0';
+            }
+            else {
+                //Do nothing
+            }
+        }
+        else {
+            //Do nothing
+        }
+    }
+};
+/**
+ * Item base object
  */
 
  /**
   * @public
   * @constructor
   * @param {object} parent
-  * @param {object} options is used to configure the itemsimple
+  * @param {object} options is used to configure the item
   */
- function ItemSimple(parent, options) {
-    DEBUGCheckArgumentsAreValids(arguments, 2);
+ sosimplist.ItemBase = function(parent, options) {
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -22,30 +223,24 @@
  /**
  * @public
  */
-ItemSimple.prototype.buildView = function() {
+sosimplist.ItemBase.prototype.buildBase = function() {
+    
     var self_ = this;
     if (self_.view_ === null) {
         self_.view_ = document.createElement('div');
         self_.view_.id = self_.id_;
         self_.view_.className = 'sosimplist-item';
 
-        if (self_.options_.edit) {
-            var divSelector = document.createElement('div');
-            divSelector.className = 'sosimplist-item-selector';
-            self_.view_.appendChild(divSelector);
-        }
-        else {
-            //Do nothing
-        }
+        //Initialize layout
+        var layout = [];
 
-        var inputCheckbox = document.createElement('input');
-        inputCheckbox.className = 'sosimplist-item-checkbox';
-        inputCheckbox.type = 'checkbox';
-        inputCheckbox.addEventListener(
-            'change',
-            function() {
+        //Add checkbox to the layout
+        var inputCheckbox = sosimplist.elementfactory.create(
+         'checkbox',
+         { 
+            checked:self_.checked_,
+            change:function() {
                 self_.check_(this.checked);
-
                 if (self_.parent_) {
                     //move item to the right container
                     self_.parent_.dispatch('moveItem', self_);
@@ -53,125 +248,108 @@ ItemSimple.prototype.buildView = function() {
                 else {
                     //Do nothing
                 }
-            },
-            false
-        );
-        inputCheckbox.checked = self_.checked_;
-        self_.view_.appendChild(inputCheckbox);
+            }
+        });
+        layout.push(inputCheckbox);
 
-        var inputText = document.createElement('div');
-        inputText.id = 'sosimplist-item-text' + self_.id_;
-        inputText.className = 'sosimplist-item-text sosimplist-editable';
-        //enable eddition
-        if (self_.options_.edit) {
-            inputText.contentEditable = true;
-        }
-        else {
-            inputText.className += ' sosimplist-edit-false';
-        }
-        inputText.setAttribute('placeholder', 'write something');
-        inputText.addEventListener(
-            'keyup',
-            function(event) {
-                if (event.keyCode === 13 && self_.parent_) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    self_.parent_.dispatch('insertItemAfter', self_);
-                }
-                else {
-                    self_.text_ = this.innerHTML;
-                }
+        //Add text element to the layout
+        var inputText = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: 'sosimplist-item-text' + self_.id_,
+            className: 'sosimplist-item-text',
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});
             },
-            false
-        );
-        inputText.addEventListener(
-            'keydown',
-            function(event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                else {
-                    //Do nothing
-                }
-            },
-            false
-        );
-         inputText.addEventListener(
-            'keypress',
-            function(event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                else {
-                    //Do nothing
-                }
-            },
-            false
-        );
-        if (self_.text_ !== '') {
-            inputText.innerHTML = self_.text_;
-        }else {}
-        self_.view_.appendChild(inputText);
+            text: self_.text_,
+            placeholder:'write something',
+            edit: self_.options_.edit
+        });
+        layout.push(inputText);
 
+        //Add others element depending on edit option
         if (self_.options_.edit) {
-            var divDelete = document.createElement('div');
-            divDelete.className = 'sosimplist-item-delete';
-            divDelete.addEventListener(
-                'click',
-                function() {
+            //Add selector at the begining of the layout
+            layout.unshift(sosimplist.elementfactory.create('selector'));
+
+            //Add delete tick at the end of the layout
+            var divDelete = sosimplist.elementfactory.create(
+            'delete',
+            {
+                click:function() {
                     if (self_.parent_) {
                         self_.parent_.dispatch('removeItem', self_);
                     }
                     else {
                         //Do nothing
                     }
+                }
+            });
+            layout.push(divDelete);
+
+            self_.view_.addEventListener(
+                'keyup',
+                function(event){
+                    sosimplist.EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
                 },
                 false
             );
-            self_.view_.appendChild(divDelete);
+            self_.view_.addEventListener(
+                'keydown',
+                sosimplist.EventStrategy.key.enter.stop,
+                false
+            );
+            self_.view_.addEventListener(
+                'keypress',
+                sosimplist.EventStrategy.key.enter.stop,
+                false
+            );
         }
         else {
             //Do nothing
+        }
+
+        for(var i = 0; i < layout.length; i++){
+            self_.view_.appendChild(layout[i]);
         }
 
         //Customize view depending on private members
         self_.check_(self_.checked_);
     }
     else {
-       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+       console.error('Item base ID = ' + self_.id_ + ', View already builded !');
     }
 };
 
  /**
 * @public
-* @return {string} return content serialize in a base64 string
+* @return {object} return serialized object 
 */
-ItemSimple.prototype.serialize = function() {
+sosimplist.ItemBase.prototype.serializeBase = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
         text: self_.text_
     };
-    return JSON.stringify(content);
+    return content;
 };
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {object} obj serialized to decode
  */
-ItemSimple.prototype.unserialize = function(str) {
+sosimplist.ItemBase.prototype.unserializeBase = function(obj) {
     try {
-        DEBUGCheckArgumentsAreValids(arguments, 1);
-        if (str) {
+       //DEBUGCheckArgumentsAreValids(arguments, 1);
+        if (obj) {
             var self_ = this;
-            var content = JSON.parse(str);
-            self_.checked_ = content.checked;
-            self_.text_ = content.text;
+            self_.id_ = obj.id_;
+            self_.checked_ = obj.checked;
+            self_.text_ = obj.text;
         }
         else {
-            throw new Error('Input str = ' + str + ', does not contain data to unserialize!');
+            throw new Error('Input obj = ' + obj + ', does not contain data to unserialize!');
         }
     }
     catch (e) {
@@ -183,7 +361,7 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   * @return {element} return view as Element object to be placed in the view
   */
- ItemSimple.prototype.getView = function() {
+ sosimplist.ItemBase.prototype.getView = function() {
     return this.view_;
  };
 
@@ -191,7 +369,7 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   * @return {string} return item id
   */
- ItemSimple.prototype.getId = function() {
+ sosimplist.ItemBase.prototype.getId = function() {
     return this.id_;
  };
 
@@ -199,14 +377,14 @@ ItemSimple.prototype.unserialize = function(str) {
   * @public
   * @return {bool} return if item is checked
   */
- ItemSimple.prototype.isChecked = function() {
+ sosimplist.ItemBase.prototype.isChecked = function() {
     return this.checked_;
  };
 
 /**
   * @public
   */
- ItemSimple.prototype.focus = function() {
+ sosimplist.ItemBase.prototype.focus = function() {
     try {
         var self_ = this;
         var el = document.getElementById('sosimplist-item-text' + self_.id_);
@@ -227,9 +405,9 @@ ItemSimple.prototype.unserialize = function(str) {
 * @private
 * @param {bool} check item or not
 */
-ItemSimple.prototype.check_ = function(check) {
+sosimplist.ItemBase.prototype.check_ = function(check) {
     try {
-        DEBUGCheckArgumentsAreValids(arguments, 1);
+       //DEBUGCheckArgumentsAreValids(arguments, 1);
 
         var self_ = this;
 
@@ -266,6 +444,167 @@ ItemSimple.prototype.check_ = function(check) {
     }
 }
 
+
+ /**
+  * @public
+  * @constructor
+  */
+ sosimplist.ItemFactory = function() {
+     var self_ = this;
+ }
+ 
+ 
+ /**
+  * @public
+  * @param {string} itemType is the type of the item to be created by the factory
+  * @return {object} return the object asked
+  */
+ sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
+     if(itemType === 'ItemText'){
+         return new sosimplist.ItemText(parent, options);
+     }
+     else if(itemType === 'ItemTextComment'){
+         return new sosimplist.ItemTextComment(parent, options);
+     }
+     else{
+         console.error('Item type = ' + itemType + ' not supported yet !');
+    }
+ }
+
+ /**
+ * @private
+ * @return {Object}
+ */
+function ItemFactory_create() {
+    return new sosimplist.ItemFactory();
+}
+
+sosimplist.itemfactory = ItemFactory_create();
+/**
+ * Item text object
+ */
+
+/**
+ * @public
+ * @constructor
+ * @extends {ItemBase}
+ * @param {object} parent
+ * @param {object} options is used to configure the item
+ */
+sosimplist.ItemText = function(parent, options) {
+    sosimplist.ItemBase.apply(this, arguments);
+}
+
+sosimplist.ItemText.prototype = new sosimplist.ItemBase();
+
+/**
+ * @public
+ */
+sosimplist.ItemText.prototype.buildView = function() {
+    var self_ = this;
+    self_.buildBase();
+};
+
+/**
+ * @public
+ * @return {object} return serialized object 
+ */
+sosimplist.ItemText.prototype.serialize = function() {
+    var self_ = this;
+    dataSerialized = self_.serializeBase();
+    dataSerialized.type = 'Text';
+    return dataSerialized;
+};
+
+/**
+ * @public
+ * @param {object} obj serialized to decode
+ */
+sosimplist.ItemText.prototype.unserialize = function(obj) {
+    var self_ = this;
+    self_.unserializeBase(obj);
+};
+
+/**
+ * Item text+comment object
+ */
+
+/**
+ * @public
+ * @constructor
+ * @extends {ItemBase}
+ * @param {object} parent
+ * @param {object} options is used to configure the item
+ */
+sosimplist.ItemTextComment = function(parent, options) {
+    var self_ = this;
+    sosimplist.ItemBase.apply(this, arguments);
+    self_.comment_='';
+}
+
+sosimplist.ItemTextComment.prototype = new sosimplist.ItemBase();
+
+/**
+ * @public
+ */
+sosimplist.ItemTextComment.prototype.buildView = function() {
+    var self_ = this;
+    self_.buildBase();
+    var itemBaseView = self_.view_;
+    if (itemBaseView) {
+        var inputComment = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: self_.id_,
+            className: 'sosimplist-item-text',
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.comment_ = inputThis.innerHTML;});
+            },
+            text: self_.comment_,
+            placeholder:'write a comment',
+            edit: self_.options_.edit
+        });
+        itemBaseView.insertBefore(inputComment, itemBaseView.lastChild);
+    }
+    else {
+       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+    }
+};
+
+/**
+ * @public
+ * @return {object} return serialized object 
+ */
+sosimplist.ItemTextComment.prototype.serialize = function() {
+    var self_ = this;
+    var dataSerialized = self_.serializeBase();
+    dataSerialized.comment = self_.comment_;
+    dataSerialized.type = 'TextComment';
+    return dataSerialized;
+};
+
+/**
+ * @public
+ * @param {object} obj serialized to decode
+ */
+sosimplist.ItemTextComment.prototype.unserialize = function(obj) {
+    try {
+       //DEBUGCheckArgumentsAreValids(arguments, 1);
+        if (obj) {
+            var self_ = this;
+            self_.unserializeBase(obj);
+            self_.comment_ = obj.comment;
+        }
+        else {
+            throw new Error('Input obj = ' + obj + ', does not contain data to unserialize!');
+        }
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
 /**
  * List object
  */
@@ -275,12 +614,13 @@ ItemSimple.prototype.check_ = function(check) {
   * @constructor
   * @param {object} options is used to configure the list
   */
- function List(options) {
+ sosimplist.List = function(options) {
      var self_ = this;
      self_.options_ = options;
      self_.id_ = 'sosimplist-list' + (new Date().getTime());
      self_.view_ = null;
      self_.title_ = '';
+     self_.image_ = null;
      self_.mapOfItem_ = {};
      self_.checkedVisible_ = false;
      self_.dropdownButtonVisible_ = false;
@@ -293,157 +633,83 @@ ItemSimple.prototype.check_ = function(check) {
  /**
  * @public
  */
-List.prototype.buildView = function() {
+sosimplist.List.prototype.buildView = function() {
     try {
         var self_ = this;
         if (self_.view_ === null) {
              self_.view_ = document.createElement('div');
              self_.view_.id = self_.id_;
              self_.view_.className = 'sosimplist-list';
+             self_.view_.style.display = 'table';
 
              if (self_.options_.edit) {
-                self_.view_.draggable = true;
+                self_.view_.draggable = false; //drag list disabled
              }
              else {
                 self_.view_.className += ' sosimplist-edit-false';
              }
 
-             var inputTitle = document.createElement('div');
-             inputTitle.id = 'sosimplist-title' + self_.id_;
-             inputTitle.className = 'sosimplist-title sosimplist-editable';
-             //enable eddition
-             if (self_.options_.edit) {
-                inputTitle.contentEditable = true;
+             var listContent = document.createElement('div');
+             listContent.className = 'sosimplist-list-content';
+             listContent.style.display = 'table-cell';
+
+             if(self_.image_){
+                 var imgElement = sosimplist.elementfactory.create('image', {
+                    position: self_.image_.position,
+                    src: self_.image_.src
+                 });
+                 if(self_.image_.position === 'bottom' ||
+                    self_.image_.position === 'right'){
+                    self_.view_.appendChild(listContent);
+                    self_.view_.appendChild(imgElement);
+                 }
+                 // Default image set to Top of the list
+                 else{
+                    self_.view_.appendChild(imgElement);
+                    self_.view_.appendChild(listContent);
+                 }
              }
              else {
-                inputTitle.className += ' sosimplist-edit-false';
+                self_.view_.appendChild(listContent);
              }
-             inputTitle.type = 'text';
-             inputTitle.setAttribute('placeholder', 'Title');
-             inputTitle.addEventListener(
-                 'keyup',
-                 function() { 
-                     if (event.keyCode === 13) {
-                         event.preventDefault();
-                         event.stopPropagation();
-                     }
-                     else {
-                        self_.title_ = this.innerHTML;
-                     }
-                 },
-                 false
-             );
-             inputTitle.addEventListener(
-                'keydown',
-                function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else {
-                        //Do nothing
-                    }
+
+             //Add text element, used for the list title, to the layout
+            var inputTitle = sosimplist.elementfactory.create(
+             'text',
+             {
+                id: 'sosimplist-title' + self_.id_,
+                className: 'sosimplist-title',
+                keyup: function(event) {
+                    var inputThis = this;
+                    sosimplist.EventStrategy.key.enter.stop(event);
+                    sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.title_ = inputThis.innerHTML;});
                 },
-                false
-            );
-             inputTitle.addEventListener(
-                'keypress',
-                function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else {
-                        //Do nothing
-                    }
-                },
-                false
-            );
-             if (self_.title_ !== '') {
-                inputTitle.innerHTML = self_.title_;
-             }
-             else {
-                //Do nothing
-             }
-             self_.view_.appendChild(inputTitle);
+                text: self_.title_,
+                placeholder:'Title',
+                edit: self_.options_.edit
+             });
+             listContent.appendChild(inputTitle);
 
              self_.itemContainer_ = document.createElement('div');
              self_.itemContainer_.className = 'sosimplist-container-item';
              self_.itemContainer_.addEventListener(
                  'dragstart',
                  function(event) {
-                    if (event.target.classList.contains('sosimplist-item')) {
-                        var parentToDrag = event.target.closest('.sosimplist-item');
-                        parentToDrag.style.zIndex = 1;
-                        parentToDrag.style.boxShadow = '3px 3px 3px grey';
-                        self_.dragData = {
-                            elementId: parentToDrag.id,
-                            source: 'item'
-                        };
-
-                        var mask = document.createElement('div');
-                        mask.id = 'mask';
-                        mask.style.backgroundColor = 'red'; //To check if opacity is working
-                        mask.style.opacity = 0; // Should be not visible with opacity = 0
-                        mask.style.width = parentToDrag.clientWidth;
-                        mask.style.height = parentToDrag.clientHeight;
-                        mask.style.cursor = 'move';
-                        document.body.appendChild(mask);
-                        event.dataTransfer.setDragImage(mask, 0, 0);
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    self_.dragData = sosimplist.EventStrategy.dragstart(event, {source: 'sosimplist-item', closest: '.sosimplist-item'});
                  },
                  false
              );
              self_.itemContainer_.addEventListener(
                  'dragenter',
                  function(event) {
-                    event.preventDefault();
-
-                    if (self_.dragData && self_.dragData.source === 'item') {
-                        var elementDragged = document.getElementById(self_.dragData.elementId);
-                        if (elementDragged) {
-                            var parentTarget = event.target.closest('.sosimplist-item');
-                            var isContainInThisList = parentTarget.parentNode.contains(elementDragged);
-                            if (isContainInThisList) {
-                                elementDragged.nextSibling === parentTarget ?
-                                elementDragged.parentNode.insertBefore(elementDragged, parentTarget.nextSibling) :
-                                elementDragged.parentNode.insertBefore(elementDragged, parentTarget);
-                            }
-                            else {
-                                //Do nothing
-                            }
-                        }
-                        else {
-                            //Do nothing
-                        }
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    sosimplist.EventStrategy.dragenter(event, self_.dragData, {source: 'sosimplist-item', closest: '.sosimplist-item'});
                  },
                  false
              );
              self_.itemContainer_.addEventListener(
                 'drop',
                 function(event) {
-                    if (self_.dragData && self_.dragData.source === 'item') {
-                        var elementDragged = document.getElementById(self_.dragData.elementId);
-                        if (elementDragged) {
-                            document.body.removeChild(document.getElementById('mask'));
-                            elementDragged.style.boxShadow = '';
-                            elementDragged.style.zIndex = '0';
-                            self_.dragData = null;
-                        }
-                        else {
-                            //Do nothing
-                        }
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    sosimplist.EventStrategy.drop(event, self_.dragData, {source: 'sosimplist-item'});
                 },
                 false
              );
@@ -454,20 +720,15 @@ List.prototype.buildView = function() {
                 },
                 false
              );
-             self_.view_.appendChild(self_.itemContainer_);
+             listContent.appendChild(self_.itemContainer_);
 
              if (self_.options_.edit) {
-                 var buttonAddItem = document.createElement('input');
-                 buttonAddItem.id = 'sosimplist-button-add-item';
-                 buttonAddItem.className = 'sosimplist-button';
-                 buttonAddItem.type = 'button';
-                 buttonAddItem.value = 'Add item';
-                 buttonAddItem.addEventListener(
-                     'click',
-                     function() { self_.addItem(); },
-                     false
-                 );
-                 self_.view_.appendChild(buttonAddItem);
+                 var buttonAddItem = sosimplist.elementfactory.create('button', {
+                    id: 'sosimplist-button-add-item',
+                    value: 'Add item',
+                    click: function() {self_.addItem();}
+                 });
+                 listContent.appendChild(buttonAddItem);
              }
              else {
                 //Do nothing
@@ -492,12 +753,11 @@ List.prototype.buildView = function() {
              pinLabel.className = 'sosimplist-list-pin-label';
              pinLabel.innerHTML = 'Selected items';
              dropdownList.appendChild(pinLabel);
-             self_.view_.appendChild(dropdownList);
+             listContent.appendChild(dropdownList);
 
              self_.itemContainerChecked_ = document.createElement('div');
              self_.itemContainerChecked_.className = 'sosimplist-container-item-checked';
-             self_.view_.appendChild(self_.itemContainerChecked_);
-
+             listContent.appendChild(self_.itemContainerChecked_);
 
              //Fill view view items
              for (var itemId in self_.mapOfItem_) {
@@ -523,13 +783,14 @@ List.prototype.buildView = function() {
 
 /**
 * @public
-* @return {string} return content serialize in a base64 string
+* @return {object} return serialized object
 */
-List.prototype.serialize = function() {
+sosimplist.List.prototype.serialize = function() {
     try {
         var self_ = this;
         var content = {
             title: self_.title_,
+            image: self_.image_,
             items: [] // parse element array to save item order
         };
         for (var i = 0; i < self_.itemContainer_.children.length; i++) {
@@ -538,7 +799,7 @@ List.prototype.serialize = function() {
         for (var j = 0; j < self_.itemContainerChecked_.children.length; j++) {
             content.items.push(self_.mapOfItem_[self_.itemContainerChecked_.children[j].id].serialize());
         }
-        return JSON.stringify(content);
+        return content;
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -547,17 +808,19 @@ List.prototype.serialize = function() {
 
 /**
  * @public
- * @param {string} str content serialized in a base64 string to decode
+ * @param {object} obj content serialized to decode
  */
-List.prototype.unserialize = function(str) {
+sosimplist.List.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
-        var content = JSON.parse(str);
-        self_.title_ = content.title;
+        self_.id_ = obj.id_;
+        self_.title_ = obj.title;
+        self_.image_ = obj.image;
         self_.mapOfItem_ = {};
-        for (var i = 0; i < content.items.length; i++) {
-            var myItem = new ItemSimple(self_, self_.options_);
-            myItem.unserialize(content.items[i]);
+        for (var i = 0; i < obj.items.length; i++) {
+            var myItem = sosimplist.itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
+            obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
+            myItem.unserialize(obj.items[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
         }
@@ -571,7 +834,7 @@ List.prototype.unserialize = function(str) {
 * @public
 * @return {string} return list id
 */
-List.prototype.getId = function() {
+sosimplist.List.prototype.getId = function() {
     return this.id_;
 };
 
@@ -580,10 +843,10 @@ List.prototype.getId = function() {
 * Add item to this list
 * @param {object} itemElementCurrent used as index to create the new item element.
 */
-List.prototype.addItem = function(itemElementCurrent) {
+sosimplist.List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = new ItemSimple(self_, self_.options_);
+        var myItem = sosimplist.itemfactory.create('ItemText', self_, self_.options_);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
@@ -594,7 +857,10 @@ List.prototype.addItem = function(itemElementCurrent) {
                 self_.itemContainer_.appendChild(myItem.getView());
             }
             myItem.focus();
-        }else {}
+        }
+        else {
+            //Do nothing
+        }
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -606,7 +872,7 @@ List.prototype.addItem = function(itemElementCurrent) {
 * Remove given item from this list
 * @param {object} item
 */
-List.prototype.removeItem = function(item) {
+sosimplist.List.prototype.removeItem = function(item) {
     try {
         var self_ = this;
         if (self_.itemContainer_.contains(document.getElementById(item.getId()))) {
@@ -629,7 +895,7 @@ List.prototype.removeItem = function(item) {
 * Move given item to the right list container (checked container or default container)
 * @param {object} item
 */
-List.prototype.moveItem = function(item) {
+sosimplist.List.prototype.moveItem = function(item) {
     try {
         var self_ = this;
         if (item.isChecked()) {
@@ -650,7 +916,7 @@ List.prototype.moveItem = function(item) {
 * Insert new item after item given into parameter
 * @param {object} item used as reference to insert new item after.
 */
-List.prototype.insertItemAfter = function(item) {
+sosimplist.List.prototype.insertItemAfter = function(item) {
     try {
         var self_ = this;
         self_.addItem(document.getElementById(item.getId()));
@@ -666,7 +932,7 @@ List.prototype.insertItemAfter = function(item) {
 * @param {string} eventName
 * @param {object} data
 */
-List.prototype.dispatch = function(eventName, data) {
+sosimplist.List.prototype.dispatch = function(eventName, data) {
     try {
         var self_ = this;
         if (eventName === 'moveItem') {
@@ -691,14 +957,14 @@ List.prototype.dispatch = function(eventName, data) {
   * @public
   * @return {string} return view as Element object to be placed in the view
   */
- List.prototype.getView = function() {
+ sosimplist.List.prototype.getView = function() {
      return this.view_;
  };
 
  /**
   * @private
   */
- List.prototype.setVisibility_ = function() {
+ sosimplist.List.prototype.setVisibility_ = function() {
     try {
         var self_ = this;
          //hide/show list of item checked
@@ -743,7 +1009,7 @@ var E_SAVE_IN = {
  * @private
  * @constructor
  */
-function Sosimplist() {
+sosimplist.Manager = function() {
     /** @private */
     var self_ = this;
     self_.sosimplistId_ = new Date().getTime();
@@ -756,6 +1022,7 @@ function Sosimplist() {
         edit: true, // edit / remove / add
         checkable: true  // can check list item or not
     };
+    self_.dragData = null;
 }
 
 /**
@@ -763,7 +1030,7 @@ function Sosimplist() {
  * @param {string} viewId is the element Id where to display the list manager
  * @param {object} options is used to configure the list manager
  */
-Sosimplist.prototype.init = function(viewId, options) {
+sosimplist.Manager.prototype.init = function(viewId, options) {
     try {
         var self_ = this;
         if (self_.view_ === null) {
@@ -785,8 +1052,8 @@ Sosimplist.prototype.init = function(viewId, options) {
             var dataToUnserialize = null;
             var hrefArray = window.location.href.split('#');
             // Try with init input parameters
-            if(self_.options_.data){
-                dataToUnserialize = self_.options_.data;
+            if(self_.options_.data && self_.options_.data.length > 0){
+                dataToUnserialize = JSON.stringify(self_.options_.data);
             }
             // Try with URI
             else if(hrefArray[1]){
@@ -797,40 +1064,18 @@ Sosimplist.prototype.init = function(viewId, options) {
             }
             self_.unserialize(dataToUnserialize);
 
-            /// @TODO clear all elment in the view before adding ours
-            //self_.view_
-
             //build view
             self_.view_ = document.getElementById(this.viewId_);
+
+            //Display warning on not empty view
+            if(self_.view_ && self_.view_.children.length > 0){
+                console.warning("Sosimplist will append all lists at the end of the element ID = '"+self_.viewId_+"'!");
+            }
             self_.view_.className += 'sosimplist';
-            self_.view_.addEventListener(
-                 'keyup',
-                 function() {
-                    self_.updateLocation_();
-                 },
-                 false
-             );
-             self_.view_.addEventListener(
-                 'change',
-                 function() {
-                    self_.updateLocation_();
-                 },
-                 false
-             );
-             self_.view_.addEventListener(
-                 'click',
-                 function() {
-                    self_.updateLocation_();
-                 },
-                 false
-             );
-             self_.view_.addEventListener(
-                 'dragend',
-                 function() {
-                    self_.updateLocation_();
-                 },
-                 false
-             );
+            self_.view_.addEventListener('keyup', function(){self_.updateLocation_();}, false);
+            self_.view_.addEventListener('change', function(){self_.updateLocation_();}, false);
+            self_.view_.addEventListener('click', function(){self_.updateLocation_();}, false);
+            self_.view_.addEventListener('dragend', function(){self_.updateLocation_();}, false);
 
             self_.listContainer_ = document.createElement('div');
             self_.listContainer_.id = 'sosimplist-container-list' + self_.sosimplistId_;
@@ -838,74 +1083,21 @@ Sosimplist.prototype.init = function(viewId, options) {
             self_.listContainer_.addEventListener(
                 'dragstart',
                 function(event) {
-                    if (false && event.srcElement.classList.contains('sosimplist-list')) {
-                        var parentToDrag = event.target.closest('.sosimplist-list');
-                        parentToDrag.style.zIndex = 1;
-                        parentToDrag.style.boxShadow = '3px 3px 3px grey';
-                        event.dataTransfer.setData('elementId', parentToDrag.id);
-                        event.dataTransfer.setData('source', 'list');
-
-                        var mask = document.createElement('div');
-                        mask.id = 'mask';
-                        mask.style.backgroundColor = 'red'; //To check if opacity is working
-                        mask.style.opacity = 0; // Should be not visible with opacity = 0
-                        mask.style.width = parentToDrag.clientWidth;
-                        mask.style.height = parentToDrag.clientHeight;
-                        mask.style.cursor = 'move';
-                        document.body.appendChild(mask);
-                        //event.dataTransfer.setDragImage(mask, 0, 0);
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    self_.dragData = sosimplist.EventStrategy.dragstart(event, {source: 'sosimplist-list', closest: '.sosimplist-list'});
                 },
                 false
             );
             self_.listContainer_.addEventListener(
                 'dragenter',
                 function(event) {
-                    event.preventDefault();
-                    if (false && event.dataTransfer.getData('source') === 'list') {
-                        var elementDragged = document.getElementById(event.dataTransfer.getData('elementId'));
-                        if (elementDragged) {
-                            var parentTarget = event.target.closest('.sosimplist-list');
-                            var isContainInThisList = parentTarget.parentNode.contains(elementDragged);
-                            if (isContainInThisList) {
-                                elementDragged.nextSibling === parentTarget ?
-                                elementDragged.parentNode.insertBefore(elementDragged, parentTarget.nextSibling) :
-                                elementDragged.parentNode.insertBefore(elementDragged, parentTarget);
-                            }
-                            else {
-                                //Do nothing
-                            }
-                        }
-                        else {
-                            //Do nothing
-                        }
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    sosimplist.EventStrategy.dragenter(event, self_.dragData, {source: 'sosimplist-list', closest: '.sosimplist-list'});
                 },
                 false
             );
              self_.listContainer_.addEventListener(
                 'drop',
                 function(event) {
-                    if (false && event.dataTransfer.getData('source') === 'list') {
-                        var elementDragged = document.getElementById(event.dataTransfer.getData('elementId'));
-                        if (elementDragged) {
-                            document.body.removeChild(document.getElementById('mask'));
-                            elementDragged.style.boxShadow = '';
-                            elementDragged.style.zIndex = '0';
-                        }
-                        else {
-                            //Do nothing
-                        }
-                    }
-                    else {
-                        //Do nothing
-                    }
+                    sosimplist.EventStrategy.drop(event, self_.dragData, {source: 'sosimplist-list'});
                 },
                 false
              );
@@ -923,28 +1115,18 @@ Sosimplist.prototype.init = function(viewId, options) {
             }
 
             if (self_.options_.edit) {
-                var buttonAddList = document.createElement('input');
-                    buttonAddList.className = 'sosimplist-button';
-                    buttonAddList.id = 'sosimplist-button-add-list';
-                    buttonAddList.type = 'button';
-                    buttonAddList.value = 'Add list';
-                    buttonAddList.addEventListener(
-                        'click',
-                        function() {self_.addList();},
-                        false
-                    );
+                var buttonAddList = sosimplist.elementfactory.create('button', {
+                    id: 'sosimplist-button-add-list',
+                    value: 'Add list',
+                    click: function() {self_.addList();}
+                });
                 self_.view_.appendChild(buttonAddList);
 
-                var buttonClear = document.createElement('input');
-                    buttonClear.className = 'sosimplist-button';
-                    buttonClear.id = 'sosimplist-button-clear';
-                    buttonClear.type = 'button';
-                    buttonClear.value = 'Clear';
-                    buttonClear.addEventListener(
-                        'click',
-                        function() {self_.clearAll();},
-                        false
-                    );
+                var buttonClear = sosimplist.elementfactory.create('button', {
+                    id: 'sosimplist-button-clear',
+                    value: 'Clear',
+                    click: function() {self_.clearAll();}
+                });
                 self_.view_.appendChild(buttonClear);
             }
             else {
@@ -964,7 +1146,7 @@ Sosimplist.prototype.init = function(viewId, options) {
  * @public
  * @return {string} return content serialize in a JSON object
  */
-Sosimplist.prototype.serialize = function() {
+sosimplist.Manager.prototype.serialize = function() {
     var self_ = this;
     var content = [];
     for (var listId in self_.mapOfList_) {
@@ -978,15 +1160,15 @@ Sosimplist.prototype.serialize = function() {
  * @public
  * @param {string} str content serialized in a JSON object
  */
-Sosimplist.prototype.unserialize = function(str) {
+sosimplist.Manager.prototype.unserialize = function(str) {
     try {
         var self_ = this;
         if(str){
             var content = JSON.parse(str);
-            self_.viewId_ = content.viewId_;
             self_.mapOfList_ = {};
             for (var i = 0; i < content.length; i++) {
-                var myList = new List(self_.options_);
+                var myList = new sosimplist.List(self_.options_);
+                content[i].id_ = content[i].id_ ? content[i].id_ : myList.getId()+i ;
                 myList.unserialize(content[i]);
                 myList.buildView();
                 self_.mapOfList_[myList.getId()] = myList;
@@ -1006,10 +1188,10 @@ Sosimplist.prototype.unserialize = function(str) {
 /**
  * @public
  */
-Sosimplist.prototype.addList = function() {
+sosimplist.Manager.prototype.addList = function() {
     try {
         var self_ = this;
-        var myList = new List(self_.options_);
+        var myList = new sosimplist.List(self_.options_);
         myList.buildView();
         self_.listContainer_.appendChild(myList.getView());
         self_.mapOfList_[myList.getId()] = myList;
@@ -1022,7 +1204,7 @@ Sosimplist.prototype.addList = function() {
 /**
  * @public
  */
-Sosimplist.prototype.clearAll = function() {
+sosimplist.Manager.prototype.clearAll = function() {
     try {
         var self_ = this;
         self_.mapOfList_ = {};
@@ -1042,7 +1224,7 @@ Sosimplist.prototype.clearAll = function() {
   * @public
   * @return {string} return view as Element object to be placed in the DOM
   */
- Sosimplist.prototype.getView = function() {
+ sosimplist.Manager.prototype.getView = function() {
      return this.view_;
  };
 
@@ -1050,7 +1232,7 @@ Sosimplist.prototype.clearAll = function() {
 * @public
 * @return {string} return Sosimplist id
 */
-Sosimplist.prototype.getId = function() {
+sosimplist.Manager.prototype.getId = function() {
     return this.viewId_;
 };
 
@@ -1058,7 +1240,7 @@ Sosimplist.prototype.getId = function() {
  * @private
  * @param {string} viewId
  */
-Sosimplist.prototype.updateLocation_ = function(viewId) {
+sosimplist.Manager.prototype.updateLocation_ = function(viewId) {
     var self_ = this;
     if (E_SAVE_IN.URL === self_.options_.save) {
         window.location.href = window.location.href.split('#')[0] + '#' + btoa(self_.serialize());
@@ -1071,10 +1253,23 @@ Sosimplist.prototype.updateLocation_ = function(viewId) {
  * @return {Object}
  */
 function Sosimplist_create() {
-    return new Sosimplist();
+    return new sosimplist.Manager();
 }
+/**
+ * @private
+ * Creating solsimplist manager
+ */
+sosimplist.mgr = Sosimplist_create(); 
 
-var sosimplist = Sosimplist_create();
+/**
+ * @public
+ * @param {string} viewId is the element Id where to display the list manager
+ * @param {object} options is used to configure the list manager
+ */
+sosimplist.init = function(viewId, options){
+    var self_ = this;
+    self_.mgr.init(viewId, options);
+};
 
 
 

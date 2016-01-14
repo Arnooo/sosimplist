@@ -1,3 +1,5 @@
+var OS = process.platform;
+
 module.exports = function(grunt) {
     
     // Project configuration.
@@ -14,27 +16,27 @@ module.exports = function(grunt) {
         open : {
             server : {
                 path: 'http://localhost:9001',
-                app: 'google-chrome'
+                app: OS==='linux'?'google-chrome':'Google Chrome'
             },
-            test : {
+            coverage : {
                 path: 'http://localhost:9001/test/coverage/report-html/',
-                app: 'google-chrome'
+                app: OS==='linux'?'google-chrome':'Google Chrome'
             }
         },
         watch: {
-            scripts: {
-                files: ['src/*.js'],
+            dev: {
+                files: ['src/*.js', 'test/**/*.js'],
                 tasks: ['build-dev']
-            },
+            }
         },
         concat: {
             dev: {
-                src: ['src/itemsimple.js', 'src/list.js', 'src/sosimplist.js'],
-                dest: 'dist/sosimplist.min.js',
+                src: ['src/*.js'],
+                dest: 'dist/<%= pkg.name %>.js'
             },
             prod: {
-                src: ['src/itemsimple.js', 'src/list.js', 'src/sosimplist.js'],
-                dest: 'dist/sosimplist.js',
+                src: ['src/*.js'],
+                dest: 'dist/<%= pkg.name %>.js'
             }
         },
         uglify: {
@@ -47,26 +49,50 @@ module.exports = function(grunt) {
             }
         },
         "regex-replace": {
-            build: {
-                src: ['dist/<%= pkg.name %>.js'],
+            prod: {
+                src: ['dist/<%= pkg.name %>.js', 'index.html'],
                 actions: [
                     {
-                        name: 'DEBUG',
+                        name: 'Comment DEBUG',
                         search: '(^|\\s)DEBUG',
                         replace: '//DEBUG',
+                        flags: 'g'
+                    },
+                    {
+                        name: 'Lib <%= pkg.name %>',
+                        search: '<%= pkg.name %>.js',
+                        replace: '<%= pkg.name %>.min.js',
+                        flags: 'g'
+                    },
+                    {
+                        name: 'Comment Build time',
+                        search: '<p>Last auto build time: .*</p>',
+                        replace: '<!--<p>Last auto build time: </p>-->',
                         flags: 'g'
                     }
                 ]
             },
             dev: {
-                src: ['dist/<%= pkg.name %>.js'],
+                src: ['dist/<%= pkg.name %>.js', 'index.html'],
                 actions: [
-                {
-                    name: 'DEBUG',
-                     search: '(^|\\s)//DEBUG',
-                               replace: 'DEBUG',
-                               flags: 'g'
-                }
+                    {
+                        name: 'Uncomment DEBUG',
+                        search: '(^|\\s)//DEBUG',
+                        replace: 'DEBUG',
+                        flags: 'g'
+                    },
+                    {
+                        name: 'Lib <%= pkg.name %>',
+                        search: '<%= pkg.name %>.min.js',
+                        replace: '<%= pkg.name %>.js',
+                        flags: 'g'
+                    },
+                    {
+                        name: 'Build time',
+                        search: '(<!--)?<p>Last auto build time: .*</p>(-->)?',
+                        replace: '<p>Last auto build time: '+new Date().toLocaleString()+'</p>',
+                        flags: 'g'
+                    }
                 ]
             }
         },
@@ -89,13 +115,16 @@ module.exports = function(grunt) {
                     dir : 'test/coverage/',
                      reporters: [
                      { type: 'html', subdir: 'report-html' },
-                     { type: 'lcov', subdir: 'report-lcov' },
+                     { type: 'lcov', subdir: 'report-lcov' }
                      ]
                 },
                 frameworks: ['jasmine']
             },
             dev: {
                 background: true,
+                singleRun: false
+            },
+            test: {
                 singleRun: false
             },
             prod: {
@@ -125,10 +154,13 @@ module.exports = function(grunt) {
     
     // task(s). DEV
     grunt.registerTask('build-dev', ['concat:dev', 'regex-replace:dev']);
-    grunt.registerTask('dev', ['build-dev', 'karma:dev', 'connect:server', 'open:server', 'open:test', 'watch']);
+    grunt.registerTask('dev', ['build-dev', 'connect:server', 'open:server', 'open:coverage', 'watch:dev']);
     
+    // task(s). TEST
+    grunt.registerTask('test', ['build-dev', 'karma:test']);
+
     // task(s). PROD
-    grunt.registerTask('build-prod', ['concat:prod', 'regex-replace:build', 'uglify']);
+    grunt.registerTask('build-prod', ['concat:prod', 'regex-replace:prod', 'uglify']);
     grunt.registerTask('semaphore', ['build-prod', 'karma:prod', 'coveralls']);
     grunt.registerTask('prod', ['build-prod', 'karma:prod']);
     

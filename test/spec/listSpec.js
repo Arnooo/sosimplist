@@ -2,7 +2,7 @@ describe("List", function() {
   var list; 
 
   beforeEach(function() {
-    list = new List({edit:true});
+    list = new sosimplist.List({edit:true});
     spyOn(console, 'error');
   });
 
@@ -21,7 +21,7 @@ describe("List", function() {
   it("should have one default item in the list", function() {
     var count = 0;
     for (var itemId in list.mapOfItem_) {
-        expect(list.mapOfItem_[itemId]).toEqual(jasmine.any(ItemSimple));
+        expect(list.mapOfItem_[itemId]).toEqual(jasmine.any(sosimplist.ItemBase));
         count++;
     }
     expect(count).toEqual(1);
@@ -47,7 +47,7 @@ describe("List", function() {
       
       expect($('.sosimplist-list')).toBeInDOM(true);
       expect($('.sosimplist-list')).toEqual('div');
-      expect($('.sosimplist-list')).toHaveAttr('draggable', 'true');
+      expect($('.sosimplist-list')).toHaveAttr('draggable', 'false');
 
       expect($('.sosimplist-title')).toBeInDOM(true);
       expect($('.sosimplist-title')).toEqual('div');
@@ -177,6 +177,7 @@ describe("List", function() {
         var data = list.serialize();
         var shouldBeData = {
             title: list.title_,
+            image: list.image_,
             items: []
         };   
         for (var itemId in list.mapOfItem_) {

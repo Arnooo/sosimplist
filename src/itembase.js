@@ -1,15 +1,14 @@
 /**
- * Item simple object
+ * Item base object
  */
 
  /**
   * @public
   * @constructor
   * @param {object} parent
-  * @param {object} options is used to configure the itemsimple
+  * @param {object} options is used to configure the item
   */
- function ItemSimple(parent, options) {
-    DEBUGCheckArgumentsAreValids(arguments, 2);
+ sosimplist.ItemBase = function(parent, options) {
     var self_ = this;
     self_.parent_ = parent;
     self_.options_ = options;
@@ -22,30 +21,24 @@
  /**
  * @public
  */
-ItemSimple.prototype.buildView = function() {
+sosimplist.ItemBase.prototype.buildBase = function() {
+    
     var self_ = this;
     if (self_.view_ === null) {
         self_.view_ = document.createElement('div');
         self_.view_.id = self_.id_;
         self_.view_.className = 'sosimplist-item';
 
-        if (self_.options_.edit) {
-            var divSelector = document.createElement('div');
-            divSelector.className = 'sosimplist-item-selector';
-            self_.view_.appendChild(divSelector);
-        }
-        else {
-            //Do nothing
-        }
+        //Initialize layout
+        var layout = [];
 
-        var inputCheckbox = document.createElement('input');
-        inputCheckbox.className = 'sosimplist-item-checkbox';
-        inputCheckbox.type = 'checkbox';
-        inputCheckbox.addEventListener(
-            'change',
-            function() {
+        //Add checkbox to the layout
+        var inputCheckbox = sosimplist.elementfactory.create(
+         'checkbox',
+         { 
+            checked:self_.checked_,
+            change:function() {
                 self_.check_(this.checked);
-
                 if (self_.parent_) {
                     //move item to the right container
                     self_.parent_.dispatch('moveItem', self_);
@@ -53,94 +46,77 @@ ItemSimple.prototype.buildView = function() {
                 else {
                     //Do nothing
                 }
-            },
-            false
-        );
-        inputCheckbox.checked = self_.checked_;
-        self_.view_.appendChild(inputCheckbox);
+            }
+        });
+        layout.push(inputCheckbox);
 
-        var inputText = document.createElement('div');
-        inputText.id = 'sosimplist-item-text' + self_.id_;
-        inputText.className = 'sosimplist-item-text sosimplist-editable';
-        //enable eddition
-        if (self_.options_.edit) {
-            inputText.contentEditable = true;
-        }
-        else {
-            inputText.className += ' sosimplist-edit-false';
-        }
-        inputText.setAttribute('placeholder', 'write something');
-        inputText.addEventListener(
-            'keyup',
-            function(event) {
-                if (event.keyCode === 13 && self_.parent_) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    self_.parent_.dispatch('insertItemAfter', self_);
-                }
-                else {
-                    self_.text_ = this.innerHTML;
-                }
+        //Add text element to the layout
+        var inputText = sosimplist.elementfactory.create(
+         'text',
+         {
+            id: 'sosimplist-item-text' + self_.id_,
+            className: 'sosimplist-item-text',
+            keyup: function(event) {
+                var inputThis = this;
+                sosimplist.EventStrategy.key.not.enter.do(event, function(){self_.text_ = inputThis.innerHTML;});
             },
-            false
-        );
-        inputText.addEventListener(
-            'keydown',
-            function(event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                else {
-                    //Do nothing
-                }
-            },
-            false
-        );
-         inputText.addEventListener(
-            'keypress',
-            function(event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                else {
-                    //Do nothing
-                }
-            },
-            false
-        );
-        if (self_.text_ !== '') {
-            inputText.innerHTML = self_.text_;
-        }else {}
-        self_.view_.appendChild(inputText);
+            text: self_.text_,
+            placeholder:'write something',
+            edit: self_.options_.edit
+        });
+        layout.push(inputText);
 
+        //Add others element depending on edit option
         if (self_.options_.edit) {
-            var divDelete = document.createElement('div');
-            divDelete.className = 'sosimplist-item-delete';
-            divDelete.addEventListener(
-                'click',
-                function() {
+            //Add selector at the begining of the layout
+            layout.unshift(sosimplist.elementfactory.create('selector'));
+
+            //Add delete tick at the end of the layout
+            var divDelete = sosimplist.elementfactory.create(
+            'delete',
+            {
+                click:function() {
                     if (self_.parent_) {
                         self_.parent_.dispatch('removeItem', self_);
                     }
                     else {
                         //Do nothing
                     }
+                }
+            });
+            layout.push(divDelete);
+
+            self_.view_.addEventListener(
+                'keyup',
+                function(event){
+                    sosimplist.EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch('insertItemAfter', self_);}});
                 },
                 false
             );
-            self_.view_.appendChild(divDelete);
+            self_.view_.addEventListener(
+                'keydown',
+                sosimplist.EventStrategy.key.enter.stop,
+                false
+            );
+            self_.view_.addEventListener(
+                'keypress',
+                sosimplist.EventStrategy.key.enter.stop,
+                false
+            );
         }
         else {
             //Do nothing
+        }
+
+        for(var i = 0; i < layout.length; i++){
+            self_.view_.appendChild(layout[i]);
         }
 
         //Customize view depending on private members
         self_.check_(self_.checked_);
     }
     else {
-       console.error('Item simple ID = ' + self_.id_ + ', View already builded !');
+       console.error('Item base ID = ' + self_.id_ + ', View already builded !');
     }
 };
 
@@ -148,7 +124,7 @@ ItemSimple.prototype.buildView = function() {
 * @public
 * @return {object} return serialized object 
 */
-ItemSimple.prototype.serialize = function() {
+sosimplist.ItemBase.prototype.serializeBase = function() {
     var self_ = this;
     var content = {
         checked: self_.checked_,
@@ -161,7 +137,7 @@ ItemSimple.prototype.serialize = function() {
  * @public
  * @param {object} obj serialized to decode
  */
-ItemSimple.prototype.unserialize = function(obj) {
+sosimplist.ItemBase.prototype.unserializeBase = function(obj) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
         if (obj) {
@@ -183,7 +159,7 @@ ItemSimple.prototype.unserialize = function(obj) {
   * @public
   * @return {element} return view as Element object to be placed in the view
   */
- ItemSimple.prototype.getView = function() {
+ sosimplist.ItemBase.prototype.getView = function() {
     return this.view_;
  };
 
@@ -191,7 +167,7 @@ ItemSimple.prototype.unserialize = function(obj) {
   * @public
   * @return {string} return item id
   */
- ItemSimple.prototype.getId = function() {
+ sosimplist.ItemBase.prototype.getId = function() {
     return this.id_;
  };
 
@@ -199,14 +175,14 @@ ItemSimple.prototype.unserialize = function(obj) {
   * @public
   * @return {bool} return if item is checked
   */
- ItemSimple.prototype.isChecked = function() {
+ sosimplist.ItemBase.prototype.isChecked = function() {
     return this.checked_;
  };
 
 /**
   * @public
   */
- ItemSimple.prototype.focus = function() {
+ sosimplist.ItemBase.prototype.focus = function() {
     try {
         var self_ = this;
         var el = document.getElementById('sosimplist-item-text' + self_.id_);
@@ -227,7 +203,7 @@ ItemSimple.prototype.unserialize = function(obj) {
 * @private
 * @param {bool} check item or not
 */
-ItemSimple.prototype.check_ = function(check) {
+sosimplist.ItemBase.prototype.check_ = function(check) {
     try {
         DEBUGCheckArgumentsAreValids(arguments, 1);
 

@@ -8,18 +8,23 @@
         edit : true,
         data : [
                 {title : 'Todo',
+                image:{
+                    position: 'top',
+                    src: 'http://commentvoyager.info/wp-content/uploads/2015/11/passport-tampon-visa-small.png'
+                },
                 items : [
-                    {checked : false, text : 'Task 1'},
-                    {checked : false, text : 'Task 2'}
+                    {type: 'Text', checked : false, text : 'Task 1'},
+                    {type: 'Text', checked : false, text : 'Task 2'}
                 ]},
                 {title : 'Course',
                 items : [
-                    {checked : false, text : 'Jambon'},
-                    {checked : true, text : 'Fromage'},
-                    {checked : false, text : 'Riz'}
+                    {type: 'TextComment', checked : false, text : 'Jambon', comment:'Le jambon c\'est bon'},
+                    {type: 'Text', checked : true, text : 'Fromage'},
+                    {type: 'Text', checked : false, text : 'Riz'}
                 ]}
             ]
     });">
+    <!--<p>Last auto build time: </p>-->
     <a href="https://github.com/Arnooo/sosimplist">View source code on Github</a>    
     <div id="view-sosimplist"></div>
 </body>
