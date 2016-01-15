@@ -363,9 +363,17 @@ sosimplist.List.prototype.dispatch = function(eventName, data) {
          //hide/show list of item checked
         if (self_.checkedVisible_) {
             self_.view_.getElementsByClassName('sosimplist-container-item-checked')[0].style.display = '';
+            setTimeout(function(){
+                self_.view_.getElementsByClassName('sosimplist-container-item-checked')[0].style.opacity = '1';
+               // self_.view_.getElementsByClassName('sosimplist-container-item-checked')[0].style.transform = 'translate(0, 0)';
+            },10);
+            self_.view_.getElementsByClassName('sosimplist-list-pin')[0].style.transform = 'rotate(90deg)';
         }
         else {
+            self_.view_.getElementsByClassName('sosimplist-container-item-checked')[0].style.opacity = '0';
+            //self_.view_.getElementsByClassName('sosimplist-container-item-checked')[0].style.transform = 'translate(0, -100%)';
             self_.view_.getElementsByClassName('sosimplist-container-item-checked')[0].style.display = 'none';
+            self_.view_.getElementsByClassName('sosimplist-list-pin')[0].style.transform = '';
         }
 
         self_.dropdownButtonVisible_ = self_.itemContainerChecked_.hasChildNodes();

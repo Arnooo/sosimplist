@@ -72,11 +72,18 @@
     display: inline-block;
     vertical-align: middle;
     margin-right: 3px;
+
+    transition: 0.5s ease-in-out;
 }
 
 .sosimplist-list-pin-label{
     display: inline-block;
     font-size: 12px;
+}
+
+.sosimplist-container-item-checked{
+
+    transition: 0.5s ease-in-out;
 }
 
 .sosimplist-item {
