@@ -12,7 +12,7 @@ sosimplist.DefaultTranslationModule = function(options){
     self_.text_ = {
         fr:{
             'Title': 'Titre',
-            'Add item': 'Ajouter une élément',
+            'Add item': 'Ajouter un élément',
             'Selected items': 'Eléments sélectionnés',
             'Add list': 'Ajouter une liste',
             'Clear': 'Tout supprimer'

@@ -29,6 +29,17 @@
         }
     });">
     <!--<p>Last auto build time: </p>-->
+    <p>
+        <select name='lang' onchange='sosimplist.mgr.setLang({lang: this.value})'>
+            <option value='en'>English</option>
+            <option value='fr'>French</option>
+        </select>
+        <select name='database' onchange='sosimplist.mgr.setDatabase({dbParams:{dbService:this.value}})'>
+            <option value='none'>No Database</option>
+            <option value='url'>Data in the URL</option>
+           <!--  <option value='firebase'>Firebase database</option> -->
+        </select>
+    </p>
     <div id="view-sosimplist"></div>
 </body>
 </html>

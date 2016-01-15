@@ -1187,7 +1187,7 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
 
             //Display warning on not empty view
             if(self_.view_ && self_.view_.children.length > 0){
-                console.warning("Sosimplist will append all lists at the end of the element ID = '"+self_.viewId_+"'!");
+                console.warn("View not empty, Sosimplist will append all lists at the end of the element ID = '"+self_.viewId_+"'!");
             }
             self_.view_.className += 'sosimplist';
             self_.view_.addEventListener('keyup', function(){sosimplist.databaseModule.set(self_.serialize());}, false);
@@ -1355,6 +1355,36 @@ sosimplist.Manager.prototype.getId = function() {
 };
 
 /**
+* @public
+* @param {string} lang to use
+*/
+sosimplist.Manager.prototype.setLang = function(lang) {
+    var self_ = this;
+
+    //If lang change we reinit the view
+    if(lang.lang !== self_.options_.lang){
+        self_.cleanView_();
+        self_.init(self_.viewId_, lang);
+    }
+    else{}
+};
+
+/**
+* @public
+* @param {string} database to use
+*/
+sosimplist.Manager.prototype.setDatabase = function(database) {
+    var self_ = this;
+
+    //If db change we reinit the view
+    if(database.dbParams !== self_.options_.dbParams){
+        self_.cleanView_();
+        self_.init(self_.viewId_, database);
+    }
+    else{}
+};
+
+/**
  * @private
  * @param {string} moduleName
  * @param {object} moduleParams
@@ -1368,6 +1398,18 @@ sosimplist.Manager.prototype.loadModule_ = function(moduleName, moduleParams) {
     else{
         return null;
     }
+};
+
+/**
+ * @private
+ */
+sosimplist.Manager.prototype.cleanView_ = function() {
+    var self_ = this;
+    var myNode = document.getElementById(self_.viewId_);
+    while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+    }
+    self_.view_ = null;
 };
 
 /**
@@ -1410,7 +1452,7 @@ sosimplist.DefaultTranslationModule = function(options){
     self_.text_ = {
         fr:{
             'Title': 'Titre',
-            'Add item': 'Ajouter une élément',
+            'Add item': 'Ajouter un élément',
             'Selected items': 'Eléments sélectionnés',
             'Add list': 'Ajouter une liste',
             'Clear': 'Tout supprimer'
