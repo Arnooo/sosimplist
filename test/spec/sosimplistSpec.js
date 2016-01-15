@@ -16,7 +16,7 @@ describe("sosimplist.Manager", function() {
   describe("when view is builded", function() {
     beforeEach(function() {
       setFixtures('<div id=myView></div>');
-      sosimplist.init('myView', {save:E_SAVE_IN.NONE});
+      sosimplist.init('myView', {dbParams:{dbService: E_DB_SERVICE.URL}});
       setFixtures(sosimplist.mgr.getView());
     });
 
@@ -29,9 +29,15 @@ describe("sosimplist.Manager", function() {
 
       expect(sosimplist.mgr.options_).toEqual({
         translationModule: 'sosimplist.DefaultTranslationModule',
+        databaseModule: 'sosimplist.DefaultDatabaseModule',
+        dbParams: {
+            dbService: E_DB_SERVICE.URL,
+            dbName: null,
+            dbUser: null,
+            dbPassword: null,
+            dbData: [],
+        },
         lang:'en',
-        data:[],
-        save:E_SAVE_IN.NONE, 
         edit:true, 
         checkable : true});
 

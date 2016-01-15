@@ -1,7 +1,11 @@
  
 sosimplist.translationModule = null;
 
-// Default translation 
+/**
+ * @public
+ * @constructor
+ * @params {string} options 
+ */
 sosimplist.DefaultTranslationModule = function(options){
     var self_ = this;
     self_.lang_ = options.lang;
@@ -16,6 +20,10 @@ sosimplist.DefaultTranslationModule = function(options){
     }
 }
 
+/**
+ * @public
+ * @params {string} toTranslate 
+ */
 sosimplist.DefaultTranslationModule.prototype.translate = function(toTranslate){
     var self_ = this;
     if(self_.text_ && self_.text_[self_.lang_] && self_.text_[self_.lang_][toTranslate]){

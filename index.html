@@ -7,7 +7,9 @@
 <body onload="sosimplist.init('view-sosimplist',{
         edit : true,
         lang: 'en',
-        data : [
+        dbParams: { 
+            dbService: 'none',
+            dbData: [
                 {title : 'Todo',
                 image:{
                     position: 'top',
@@ -24,6 +26,7 @@
                     {type: 'Text', checked : false, text : 'Riz'}
                 ]}
             ]
+        }
     });">
     <!--<p>Last auto build time: </p>-->
     <div id="view-sosimplist"></div>

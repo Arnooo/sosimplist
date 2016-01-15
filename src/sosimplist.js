@@ -4,14 +4,6 @@
  *
  */
 
- /**
-  * Constant
-  */
-var E_SAVE_IN = {
-    NONE: 0,
-    URL: 1,
-    FIREBASE: 2
-};
 
 /**
  * @private
@@ -25,10 +17,16 @@ sosimplist.Manager = function() {
     self_.view_ = null;
     self_.mapOfList_ = {};
     self_.options_ = {
-        translationModule:'sosimplist.DefaultTranslationModule',
+        translationModule: 'sosimplist.DefaultTranslationModule',
+        databaseModule: 'sosimplist.DefaultDatabaseModule',
+        dbParams: {
+            dbService: E_DB_SERVICE.NONE,
+            dbName: null,
+            dbUser: null,
+            dbPassword: null,
+            dbData: [],
+        },
         lang:'en',
-        data: [],
-        save: E_SAVE_IN.URL,
         edit: true, // edit / remove / add
         checkable: true  // can check list item or not
     };
@@ -46,38 +44,17 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
         if (self_.view_ === null) {
             self_.viewId_ = viewId;
 
-            //merge options
-            if (options) {
-                for (var opt in options) {
-                    if (self_.options_[opt] !== undefined) {
-                        self_.options_[opt] = options[opt];
-                    }
-                    else {
-                        throw new Error('Option = ' + opt + ' options[opt] = ' + options[opt] + ', does not exist in this version!');
-                    }
-                }
-            }
+            //update options
+            self_.options_ = sosimplist.updateOptions(self_.options_, options);
 
             // Load translation module
-            if(self_.options_.translationModule && self_.options_.lang){
-                var TranslationModule = sosimplist.stringToFunction(self_.options_.translationModule);
-                sosimplist.translationModule = new TranslationModule({lang:self_.options_.lang});
-            }
+            sosimplist.translationModule = self_.loadModule_(self_.options_.translationModule, {lang:self_.options_.lang});
+
+            // Load database module
+            sosimplist.databaseModule = self_.loadModule_(self_.options_.databaseModule, self_.options_.dbParams);
 
             // load data 
-            var dataToUnserialize = null;
-            var hrefArray = window.location.href.split('#');
-            // Try with init input parameters
-            if(self_.options_.data && self_.options_.data.length > 0){
-                dataToUnserialize = JSON.stringify(self_.options_.data);
-            }
-            // Try with URI
-            else if(hrefArray[1]){
-                dataToUnserialize = atob(hrefArray[1]);
-            }
-            else{
-                //Do nothing
-            }
+            var dataToUnserialize = sosimplist.databaseModule.get('data');
             self_.unserialize(dataToUnserialize);
 
             //build view
@@ -88,10 +65,10 @@ sosimplist.Manager.prototype.init = function(viewId, options) {
                 console.warning("Sosimplist will append all lists at the end of the element ID = '"+self_.viewId_+"'!");
             }
             self_.view_.className += 'sosimplist';
-            self_.view_.addEventListener('keyup', function(){self_.updateLocation_();}, false);
-            self_.view_.addEventListener('change', function(){self_.updateLocation_();}, false);
-            self_.view_.addEventListener('click', function(){self_.updateLocation_();}, false);
-            self_.view_.addEventListener('dragend', function(){self_.updateLocation_();}, false);
+            self_.view_.addEventListener('keyup', function(){sosimplist.databaseModule.set(self_.serialize());}, false);
+            self_.view_.addEventListener('change', function(){sosimplist.databaseModule.set(self_.serialize());}, false);
+            self_.view_.addEventListener('click', function(){sosimplist.databaseModule.set(self_.serialize());}, false);
+            self_.view_.addEventListener('dragend', function(){sosimplist.databaseModule.set(self_.serialize());}, false);
 
             self_.listContainer_ = document.createElement('div');
             self_.listContainer_.id = 'sosimplist-container-list' + self_.sosimplistId_;
@@ -254,14 +231,18 @@ sosimplist.Manager.prototype.getId = function() {
 
 /**
  * @private
- * @param {string} viewId
+ * @param {string} moduleName
+ * @param {object} moduleParams
  */
-sosimplist.Manager.prototype.updateLocation_ = function(viewId) {
+sosimplist.Manager.prototype.loadModule_ = function(moduleName, moduleParams) {
     var self_ = this;
-    if (E_SAVE_IN.URL === self_.options_.save) {
-        window.location.href = window.location.href.split('#')[0] + '#' + btoa(self_.serialize());
+    if(moduleName){
+        var Module = sosimplist.stringToFunction(moduleName);
+        return new Module(moduleParams);
     }
-    //console.log("Location changed !");
+    else{
+        return null;
+    }
 };
 
 /**
