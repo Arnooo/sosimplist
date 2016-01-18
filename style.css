@@ -107,6 +107,7 @@
 .sosimplist-item-text {
     display: inline-block;
     min-width: 140px;
+    max-width: 328px;
     font-size: 14px;
     margin: 3px;
     cursor:text;
