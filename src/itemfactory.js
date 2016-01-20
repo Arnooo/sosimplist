@@ -20,6 +20,20 @@
      else if(itemType === 'ItemTextComment'){
          return new sosimplist.ItemTextComment(parent, options);
      }
+     else if(itemType === 'ItemComposite'){
+         var time = (new Date().getTime());
+         var config = {
+             id: 'sosimplist-item'+time,
+             focusOnElementId: 'sosimplist-item-text'+time
+         };
+         var elements = [
+             sosimplist.elementfactory.createElement('selector', {time:time}),
+             sosimplist.elementfactory.createElement('checkbox', {time:time}),
+             sosimplist.elementfactory.createElement('text', {time:time}),
+             sosimplist.elementfactory.createElement('delete', {time:time})
+          ];
+          return new sosimplist.ItemComposite(parent, config, elements);
+     } 
      else{
          console.error('Item type = ' + itemType + ' not supported yet !');
     }

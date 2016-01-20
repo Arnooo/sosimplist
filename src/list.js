@@ -154,7 +154,7 @@ sosimplist.List.prototype.buildView = function() {
 
              //Fill view view items
              for (var itemId in self_.mapOfItem_) {
-                if (self_.mapOfItem_[itemId].isChecked()) {
+                if (self_.mapOfItem_[itemId].property('checked')) {
                     self_.itemContainerChecked_.appendChild(self_.mapOfItem_[itemId].getView());
                 }
                 else {
@@ -291,7 +291,7 @@ sosimplist.List.prototype.removeItem = function(item) {
 sosimplist.List.prototype.moveItem = function(item) {
     try {
         var self_ = this;
-        if (item.isChecked()) {
+        if (item.property('checked')) {
             self_.itemContainerChecked_.appendChild(document.getElementById(item.getId()));
         }
         else {
@@ -325,17 +325,17 @@ sosimplist.List.prototype.insertItemAfter = function(item) {
 * @param {string} eventName
 * @param {object} data
 */
-sosimplist.List.prototype.dispatch = function(eventName, data) {
+sosimplist.List.prototype.dispatch = function(event) {
     try {
         var self_ = this;
-        if (eventName === 'moveItem') {
-            self_.moveItem(data);
+        if (event.name === 'checked') {
+            self_.moveItem(event.target);
         }
-        else if (eventName === 'removeItem') {
-            self_.removeItem(data);
+        else if (event.name === 'delete') {
+            self_.removeItem(event.target);
         }
-        else if (eventName === 'insertItemAfter') {
-            self_.insertItemAfter(data);
+        else if (event.name === 'insertItemAfter') {
+            self_.insertItemAfter(event.target);
         }
         else {
             //Do nothing

@@ -45,3 +45,25 @@ sosimplist.updateOptions = function(oldOptions, newOptions){
     }
     return updatedOptions;
 }
+
+/**
+ * @public
+ * @param {object} oldObject to update
+ * @param {object} newObject to use as input to update oldObject
+ * @return {object} updated object
+ */
+sosimplist.mergeObjectProperties = function(oldObject, newObject){
+    var updatedObject = oldObject;
+    if (newObject) {
+        for (var opt in newObject) {
+            if(!(updatedObject[opt] instanceof Array) && (updatedObject[opt] instanceof Object)){
+                updatedObject[opt] = sosimplist.mergeObjectProperties(updatedObject[opt], newObject[opt]);
+            }
+            else{
+                updatedObject[opt] = newObject[opt];
+            }
+        }
+    }
+    return updatedObject;
+}
+

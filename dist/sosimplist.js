@@ -48,6 +48,28 @@ sosimplist.updateOptions = function(oldOptions, newOptions){
     return updatedOptions;
 }
 
+/**
+ * @public
+ * @param {object} oldObject to update
+ * @param {object} newObject to use as input to update oldObject
+ * @return {object} updated object
+ */
+sosimplist.mergeObjectProperties = function(oldObject, newObject){
+    var updatedObject = oldObject;
+    if (newObject) {
+        for (var opt in newObject) {
+            if(!(updatedObject[opt] instanceof Array) && (updatedObject[opt] instanceof Object)){
+                updatedObject[opt] = sosimplist.mergeObjectProperties(updatedObject[opt], newObject[opt]);
+            }
+            else{
+                updatedObject[opt] = newObject[opt];
+            }
+        }
+    }
+    return updatedObject;
+}
+
+
  
  /**
   * Constant
@@ -120,6 +142,103 @@ sosimplist.DefaultDatabaseModule.prototype.set = function(data) {
     }
 };
 
+/**
+ * Element object
+ * This is a generic element, including its view, its model and its controller
+ */
+
+/**
+ * @public
+ * @constructor
+ * @param {object} parent element
+ * @param {object} configuration is used to create the element
+ */
+sosimplist.Element = function(parent, configuration) {
+    try{
+        var self_ = this;
+        self_.parent_ = parent;
+        var view = document.createElement(configuration.view.type);
+        self_.view_ = sosimplist.mergeObjectProperties(view, configuration.view.properties);
+        for(var attribute in configuration.view.attributes){
+            self_.view_.setAttribute(attribute, configuration.view.attributes[attribute]);
+        }
+        for(var i = 0; i < configuration.controller.length; i++){
+            var objToDispatch = {
+                name: configuration.controller[i].dispatch, 
+                value: self_.view_[configuration.controller[i].dispatch],
+                target: self_
+            };
+            var valueName = configuration.controller[i].dispatch;
+            self_.view_.addEventListener(configuration.controller[i].onEvent, function(event){
+                var val = self_.view_[objToDispatch.name];
+                objToDispatch.value = val;
+                self_.parent_.dispatch(objToDispatch);
+            }, 
+            false);
+        }
+        self_.model_ = configuration.model;
+    }
+    catch(e){
+        console.error(e.name + ': ' + e.message);
+    }
+}
+
+/**
+ * @public
+ */
+sosimplist.Element.prototype.getView = function() {
+    var self_ = this;
+    return self_.view_;
+}
+
+/**
+ * @public
+ * @param {string} property of this object
+ * @return {bool} return element property
+ */
+sosimplist.Element.prototype.property = function(property) {
+    var self_ = this;
+    var returnProperty = null;
+    if(self_.view_[property]){
+        returnProperty = self_.view_[property];
+    }
+    return returnProperty;
+};
+
+/**
+ * @public
+ * @return {object} return serialized object
+ */
+sosimplist.Element.prototype.serialize = function() {
+    try {
+        var self_ = this;
+        var content = {
+        };
+        for(var i = 0; i < self_.model_.length; i++){
+            content[self_.model_[i]] = self_.view_[self_.model_[i]];
+        }
+        return content;
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+ * @public
+ * @param {object} obj serialized to decode
+ */
+sosimplist.Element.prototype.unserialize = function(obj) {
+    try {
+        var self_ = this;
+        for(var attr in obj){
+            self_.view_[attr] = obj[attr];
+        }
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
  /**
   * @public
   * @constructor
@@ -127,7 +246,78 @@ sosimplist.DefaultDatabaseModule.prototype.set = function(data) {
  sosimplist.ElementFactory = function() {
      var self_ = this;
  }
- 
+
+ /**
+  * @public
+  * @param {string} elementType is the type of the item to be created by the factory
+  * @return {element} return the element asked
+  */
+ sosimplist.ElementFactory.prototype.createElement = function(elementType, options) {
+    var element = {};
+    if(elementType === 'selector'){
+        element = {
+            view: {
+                type: 'div',
+                properties: {
+                    id: 'sosimplist-item-selector'+options.time,
+                    className: 'sosimplist-item-selector'
+                }
+            },
+            model: [],
+            controller: []
+        };
+    }
+    else if(elementType === 'checkbox'){
+        element = {
+            view: {
+                type: 'input',
+                properties: {
+                    id: 'sosimplist-item-checkbox'+options.time,
+                    className: 'sosimplist-item-checkbox',
+                    type: 'checkbox',
+                    checked:true
+                }
+            },
+            model: ['checked'], //to be serialized
+            controller: [{onEvent:'change',dispatch:'checked'}]
+        };
+    }
+    else if(elementType === 'text'){
+        element = {
+            view: {
+                type: 'div',
+                properties: {
+                    id: 'sosimplist-item-text'+options.time,
+                    className: 'sosimplist-item-text sosimplist-editable',
+                    contentEditable: true,
+                    innerHTML:''
+                },
+                attributes:{
+                    placeholder: sosimplist.translate('write something'),
+                }
+            },
+            model: ['innerHTML'],
+            controller: []
+        };
+    }
+    else if(elementType === 'delete'){
+        element = {
+            view: {
+                type: 'div',
+                properties: {
+                    id: 'sosimplist-item-delete'+options.time,
+                    className: 'sosimplist-item-delete'
+                }
+            },
+            model: [],
+            controller: [{onEvent:'click',dispatch:'delete'}]
+        };
+    }
+    else{
+        //Do nothing
+    }
+    return element;
+}
   
  /**
   * @public
@@ -501,6 +691,15 @@ sosimplist.ItemBase.prototype.unserializeBase = function(obj) {
     return this.checked_;
  };
 
+ /**
+ * @public
+ * @param {string} property of this object
+ * @return {bool} return element property
+ */
+sosimplist.ItemBase.prototype.property = function(property) {
+    return this.checked_;
+};
+
 /**
   * @public
   */
@@ -564,6 +763,251 @@ sosimplist.ItemBase.prototype.check_ = function(check) {
     }
 }
 
+/**
+ * Item composite object
+ * This object will create item based on given configuration
+ */
+
+/**
+ * @public
+ * @constructor
+ * @param {object} config: {
+ * }
+ * @param {object} elements : [
+ *     {
+ *         view: {
+ *             type: 'div',
+ *             attributs: {
+ *                 id: 'checkboxID',
+ *                 className: 'checkboxClass',
+ *                 checked:false
+ *             }
+ *         },
+ *         model: {
+ *             checked:false
+ *         },
+ *         controller: {
+ *             change:
+ *         }
+ *     },
+ *
+ * ]
+ */
+sosimplist.ItemComposite = function(parent, config, elements) {
+    var self_ = this;
+    self_.parent_ = parent;
+    self_.id_ = config.id;
+    self_.focusOnElementId_ = config.focusOnElementId;
+    self_.view_ = null;
+    self_.eventToCallOnBuild = [];
+    self_.elements_ = [];
+    for(var i = 0; i < elements.length; i++){
+        var element = new sosimplist.Element(self_, elements[i]);
+        self_.elements_.push(element);
+        for(var j = 0; j < elements[i].controller.length; j++){
+            if(elements[i].controller[j].dispatch){
+                var eventName = elements[i].controller[j].dispatch;
+                var data = {
+                    eventName: eventName,
+                    elementId: i
+                };
+                self_.eventToCallOnBuild.push(data);
+            }
+            else{
+                //Do nothing
+            }
+        }
+    }
+}
+
+
+/**
+ * @public
+ */
+sosimplist.ItemComposite.prototype.appendTo = function(element) {
+    var self_ = this;
+    for(var i = 0; i < self_.elements_.length; i++){
+        element.appendChild(self_.elements_[i].getView());
+    }
+}
+
+/**
+ * @public
+ */
+sosimplist.ItemComposite.prototype.buildView = function() {
+    var self_ = this;
+    
+    self_.view_ = document.createElement('div');
+    self_.view_.id = self_.id_;
+    self_.view_.className = 'sosimplist-item';
+    self_.appendTo(self_.view_);
+
+    self_.view_.addEventListener(
+        'keyup',
+        function(event){
+            sosimplist.EventStrategy.key.enter.stop(event, function(){if(self_.parent_){self_.parent_.dispatch({name:'insertItemAfter', target:self_});}});
+        },
+        false
+    );
+    self_.view_.addEventListener(
+        'keydown',
+        sosimplist.EventStrategy.key.enter.stop,
+        false
+    );
+    self_.view_.addEventListener(
+        'keypress',
+        sosimplist.EventStrategy.key.enter.stop,
+        false
+    );
+
+    for(var i = 0; i < self_.eventToCallOnBuild.length; i++){
+        var data = self_.eventToCallOnBuild[i];
+        var eventFunction = self_[data.eventName];
+        if(eventFunction){
+            var event = {
+                name: data.eventName,
+                value: self_.elements_[data.elementId].property(data.eventName),
+                target: null
+            }
+            eventFunction.call(self_, event);
+        }
+        else{
+            //Do nothing
+        }
+    }
+};
+
+/**
+* @public
+* Dispatch event received to the right method
+* @param {string} eventName
+* @param {object} data
+*/
+sosimplist.ItemComposite.prototype.dispatch = function(event) {
+    try {
+        var self_ = this;
+        if (event.name === 'checked') {
+            self_.checked(event);
+        }
+        else {
+            //Do nothing
+        }
+        event.target = self_;
+        self_.parent_.dispatch(event);
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+ * @public
+ */
+sosimplist.ItemComposite.prototype.checked = function(event) {
+    var self_ = this;
+    if(event.name === 'checked'){
+        self_.view_.draggable = !event.value;
+        if (self_.view_.draggable) {
+            self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'visible';
+        }
+        else {
+            self_.view_.getElementsByClassName('sosimplist-item-selector')[0].style.visibility = 'hidden';
+        }
+    }
+    else{
+        //Do nothing
+    }
+};
+
+/**
+ * @public
+ * @return view
+ */
+sosimplist.ItemComposite.prototype.getView = function() {
+    var self_ = this;
+    return self_.view_;
+};
+
+
+/**
+ * @public
+ * @return {string} return item id
+ */
+sosimplist.ItemComposite.prototype.getId = function() {
+    var self_ = this;
+    return self_.id_;
+};
+
+/**
+ * @public
+ * @param {string} property of this object
+ * @return {bool} return item property
+ */
+sosimplist.ItemComposite.prototype.property = function(property) {
+    var self_ = this;
+    var returnProperty = null;
+    for(var i = 0; i < self_.elements_.length && returnProperty === null; i++){
+        returnProperty = self_.elements_[i].property(property);
+    }
+    return returnProperty;
+};
+
+/**
+ * @public
+ */
+sosimplist.ItemComposite.prototype.focus = function() {
+    try {
+        var self_ = this;
+        var el = document.getElementById(self_.focusOnElementId_);
+        var range = document.createRange();
+        var sel = window.getSelection();
+        range.setStart(el, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        el.focus();
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+ * @public
+ * @return {object} return serialized object
+ */
+sosimplist.ItemComposite.prototype.serialize = function() {
+    try {
+        var self_ = this;
+        var content = {
+            type: 'Composite',
+            elements:[]
+        };
+        for(var i = 0; i < self_.elements_.length; i++){
+            content.elements.push(self_.elements_[i].serialize());
+        }
+        return content;
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
+
+/**
+ * @public
+ * @param {object} obj serialized to decode
+ */
+sosimplist.ItemComposite.prototype.unserialize = function(obj) {
+    try {
+        var self_ = this;
+        for(var i = 0; i < obj.elements.length; i++){
+            self_.elements_[i].unserialize(obj.elements[i]);
+        }
+    }
+    catch (e) {
+        console.error(e.name + ': ' + e.message);
+    }
+};
 
  /**
   * @public
@@ -586,6 +1030,20 @@ sosimplist.ItemBase.prototype.check_ = function(check) {
      else if(itemType === 'ItemTextComment'){
          return new sosimplist.ItemTextComment(parent, options);
      }
+     else if(itemType === 'ItemComposite'){
+         var time = (new Date().getTime());
+         var config = {
+             id: 'sosimplist-item'+time,
+             focusOnElementId: 'sosimplist-item-text'+time
+         };
+         var elements = [
+             sosimplist.elementfactory.createElement('selector', {time:time}),
+             sosimplist.elementfactory.createElement('checkbox', {time:time}),
+             sosimplist.elementfactory.createElement('text', {time:time}),
+             sosimplist.elementfactory.createElement('delete', {time:time})
+          ];
+          return new sosimplist.ItemComposite(parent, config, elements);
+     } 
      else{
          console.error('Item type = ' + itemType + ' not supported yet !');
     }
@@ -886,7 +1344,7 @@ sosimplist.List.prototype.buildView = function() {
 
              //Fill view view items
              for (var itemId in self_.mapOfItem_) {
-                if (self_.mapOfItem_[itemId].isChecked()) {
+                if (self_.mapOfItem_[itemId].property('checked')) {
                     self_.itemContainerChecked_.appendChild(self_.mapOfItem_[itemId].getView());
                 }
                 else {
@@ -1023,7 +1481,7 @@ sosimplist.List.prototype.removeItem = function(item) {
 sosimplist.List.prototype.moveItem = function(item) {
     try {
         var self_ = this;
-        if (item.isChecked()) {
+        if (item.property('checked')) {
             self_.itemContainerChecked_.appendChild(document.getElementById(item.getId()));
         }
         else {
@@ -1057,17 +1515,17 @@ sosimplist.List.prototype.insertItemAfter = function(item) {
 * @param {string} eventName
 * @param {object} data
 */
-sosimplist.List.prototype.dispatch = function(eventName, data) {
+sosimplist.List.prototype.dispatch = function(event) {
     try {
         var self_ = this;
-        if (eventName === 'moveItem') {
-            self_.moveItem(data);
+        if (event.name === 'checked') {
+            self_.moveItem(event.target);
         }
-        else if (eventName === 'removeItem') {
-            self_.removeItem(data);
+        else if (event.name === 'delete') {
+            self_.removeItem(event.target);
         }
-        else if (eventName === 'insertItemAfter') {
-            self_.insertItemAfter(data);
+        else if (event.name === 'insertItemAfter') {
+            self_.insertItemAfter(event.target);
         }
         else {
             //Do nothing

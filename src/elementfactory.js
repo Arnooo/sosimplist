@@ -5,7 +5,78 @@
  sosimplist.ElementFactory = function() {
      var self_ = this;
  }
- 
+
+ /**
+  * @public
+  * @param {string} elementType is the type of the item to be created by the factory
+  * @return {element} return the element asked
+  */
+ sosimplist.ElementFactory.prototype.createElement = function(elementType, options) {
+    var element = {};
+    if(elementType === 'selector'){
+        element = {
+            view: {
+                type: 'div',
+                properties: {
+                    id: 'sosimplist-item-selector'+options.time,
+                    className: 'sosimplist-item-selector'
+                }
+            },
+            model: [],
+            controller: []
+        };
+    }
+    else if(elementType === 'checkbox'){
+        element = {
+            view: {
+                type: 'input',
+                properties: {
+                    id: 'sosimplist-item-checkbox'+options.time,
+                    className: 'sosimplist-item-checkbox',
+                    type: 'checkbox',
+                    checked:true
+                }
+            },
+            model: ['checked'], //to be serialized
+            controller: [{onEvent:'change',dispatch:'checked'}]
+        };
+    }
+    else if(elementType === 'text'){
+        element = {
+            view: {
+                type: 'div',
+                properties: {
+                    id: 'sosimplist-item-text'+options.time,
+                    className: 'sosimplist-item-text sosimplist-editable',
+                    contentEditable: true,
+                    innerHTML:''
+                },
+                attributes:{
+                    placeholder: sosimplist.translate('write something'),
+                }
+            },
+            model: ['innerHTML'],
+            controller: []
+        };
+    }
+    else if(elementType === 'delete'){
+        element = {
+            view: {
+                type: 'div',
+                properties: {
+                    id: 'sosimplist-item-delete'+options.time,
+                    className: 'sosimplist-item-delete'
+                }
+            },
+            model: [],
+            controller: [{onEvent:'click',dispatch:'delete'}]
+        };
+    }
+    else{
+        //Do nothing
+    }
+    return element;
+}
   
  /**
   * @public

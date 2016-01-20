@@ -179,6 +179,15 @@ sosimplist.ItemBase.prototype.unserializeBase = function(obj) {
     return this.checked_;
  };
 
+ /**
+ * @public
+ * @param {string} property of this object
+ * @return {bool} return element property
+ */
+sosimplist.ItemBase.prototype.property = function(property) {
+    return this.checked_;
+};
+
 /**
   * @public
   */

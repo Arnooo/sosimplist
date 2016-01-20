@@ -129,7 +129,7 @@ describe("List", function() {
       beforeEach(function() {
         for (var itemId in list.mapOfItem_) {
             list.mapOfItem_[itemId].check_(true);
-            list.dispatch('moveItem', list.mapOfItem_[itemId]);
+            list.dispatch({name:'checked', target:list.mapOfItem_[itemId]});
         }
       });
 
@@ -147,7 +147,7 @@ describe("List", function() {
       it("should restore the item to the main list when all items are checked again", function() {
         for (var itemId in list.mapOfItem_) {
             list.mapOfItem_[itemId].check_(false);
-            list.dispatch('moveItem', list.mapOfItem_[itemId]);
+            list.dispatch({name:'checked', target:list.mapOfItem_[itemId]});
         }
         expect($('.sosimplist-container-item')[0].children.length).toEqual(1);
         expect($('.sosimplist-container-item-checked')[0].children.length).toEqual(0);
@@ -157,7 +157,7 @@ describe("List", function() {
     describe("when all items are removed", function() {
       beforeEach(function() {
         for (var itemId in list.mapOfItem_) {
-            list.dispatch('removeItem', list.mapOfItem_[itemId]);
+            list.dispatch({name:'delete', target:list.mapOfItem_[itemId]});
         }
       });
 
