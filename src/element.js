@@ -12,6 +12,8 @@
 sosimplist.Element = function(parent, configuration) {
     try{
         var self_ = this;
+        self_.name_ = configuration.name;
+        self_.type_ = configuration.type;
         self_.parent_ = parent;
         var view = document.createElement(configuration.view.type);
         self_.view_ = sosimplist.mergeObjectProperties(view, configuration.view.properties);
@@ -49,6 +51,22 @@ sosimplist.Element.prototype.getView = function() {
 
 /**
  * @public
+ */
+sosimplist.Element.prototype.getName = function() {
+    var self_ = this;
+    return self_.name_;
+}
+
+/**
+ * @public
+ */
+sosimplist.Element.prototype.getType = function() {
+    var self_ = this;
+    return self_.type_;
+}
+
+/**
+ * @public
  * @param {string} property of this object
  * @return {bool} return element property
  */
@@ -68,12 +86,14 @@ sosimplist.Element.prototype.property = function(property) {
 sosimplist.Element.prototype.serialize = function() {
     try {
         var self_ = this;
-        var content = {
+        var data = {
+            name: self_.name_,
+            content: {}
         };
         for(var i = 0; i < self_.model_.length; i++){
-            content[self_.model_[i]] = self_.view_[self_.model_[i]];
+            data.content[self_.model_[i]] = self_.view_[self_.model_[i]];
         }
-        return content;
+        return data;
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -87,8 +107,9 @@ sosimplist.Element.prototype.serialize = function() {
 sosimplist.Element.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
-        for(var attr in obj){
-            self_.view_[attr] = obj[attr];
+        self_.name_ = obj.name;
+        for(var i = 0; i < self_.model_.length; i++){
+            self_.view_[self_.model_[i]] = obj.content;
         }
     }
     catch (e) {

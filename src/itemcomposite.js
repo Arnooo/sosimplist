@@ -219,7 +219,13 @@ sosimplist.ItemComposite.prototype.serialize = function() {
             elements:[]
         };
         for(var i = 0; i < self_.elements_.length; i++){
-            content.elements.push(self_.elements_[i].serialize());
+            var data = self_.elements_[i].serialize();
+            if(data && data.content){
+                content.elements.push(data);
+            }
+            else{
+                //Do nothing
+            }
         }
         return content;
     }
@@ -236,7 +242,16 @@ sosimplist.ItemComposite.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
         for(var i = 0; i < obj.elements.length; i++){
-            self_.elements_[i].unserialize(obj.elements[i]);
+            var found = false;
+            for(var j = 0; j < self_.elements_.length && !found; j++){
+                if(self_.elements_[j].getName() === obj.elements[i].name){
+                    self_.elements_[j].unserialize(obj.elements[i]);
+                    found = true;
+                }
+                else{
+                    //Do nothing
+                }
+            }
         }
     }
     catch (e) {

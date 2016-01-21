@@ -211,8 +211,9 @@ sosimplist.List.prototype.unserialize = function(obj) {
         self_.image_ = obj.image;
         self_.mapOfItem_ = {};
         for (var i = 0; i < obj.items.length; i++) {
-            var myItem = sosimplist.itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
-            obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
+            var opt = self_.options_;
+            opt.id = i;
+            var myItem = sosimplist.itemfactory.create('Item'+obj.items[i].type, self_, opt);
             myItem.unserialize(obj.items[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
@@ -239,7 +240,9 @@ sosimplist.List.prototype.getId = function() {
 sosimplist.List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = sosimplist.itemfactory.create('ItemText', self_, self_.options_);
+        var opt = self_.options_;
+        opt.id = (new Date().getTime());
+        var myItem = sosimplist.itemfactory.create('ItemText', self_, opt);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {

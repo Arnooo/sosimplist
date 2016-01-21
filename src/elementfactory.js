@@ -11,43 +11,62 @@
   * @param {string} elementType is the type of the item to be created by the factory
   * @return {element} return the element asked
   */
- sosimplist.ElementFactory.prototype.createElement = function(elementType, options) {
+ sosimplist.ElementFactory.prototype.getElementConfiguration = function(elementType, options) {
     var element = {};
     if(elementType === 'selector'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'div',
                 properties: {
-                    id: 'sosimplist-item-selector'+options.time,
+                    id: 'sosimplist-item-selector',
                     className: 'sosimplist-item-selector'
                 }
             },
             model: [],
             controller: []
         };
+        if(options){
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
     }
     else if(elementType === 'checkbox'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'input',
                 properties: {
-                    id: 'sosimplist-item-checkbox'+options.time,
+                    id: 'sosimplist-item-checkbox',
                     className: 'sosimplist-item-checkbox',
                     type: 'checkbox',
-                    checked:true
+                    checked:false
                 }
             },
             model: ['checked'], //to be serialized
             controller: [{onEvent:'change',dispatch:'checked'}]
         };
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
     }
     else if(elementType === 'text'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'div',
                 properties: {
-                    id: 'sosimplist-item-text'+options.time,
-                    className: 'sosimplist-item-text sosimplist-editable',
+                    id: 'sosimplist-item-text',
+                    className: 'sosimplist-item-text',
                     contentEditable: true,
                     innerHTML:''
                 },
@@ -58,19 +77,43 @@
             model: ['innerHTML'],
             controller: []
         };
+        
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+            element.view.properties.contentEditable = options.edit;
+            element.view.attributes.placeholder = sosimplist.translate(options.content);
+            if(options.edit){
+                element.view.properties.className += ' sosimplist-editable';
+            }
+            else{
+                element.view.properties.className += ' sosimplist-edit-false';
+            }
+        }
+        else{
+            //Do nothing
+        }
     }
     else if(elementType === 'delete'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'div',
                 properties: {
-                    id: 'sosimplist-item-delete'+options.time,
+                    id: 'sosimplist-item-delete',
                     className: 'sosimplist-item-delete'
                 }
             },
             model: [],
             controller: [{onEvent:'click',dispatch:'delete'}]
         };
+        if(options){
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
     }
     else{
         //Do nothing

@@ -16,14 +16,23 @@
                     src: 'http://commentvoyager.info/wp-content/uploads/2015/11/passport-tampon-visa-small.png'
                 },
                 items : [
-                    {type: 'Composite', elements:[{}, {checked : true}, {innerHTML : 'Task 1'}, {}]},
-                    {type: 'Composite', elements:[{}, {checked : false}, {innerHTML : 'Task 2'}, {}]}
+                    {type: 'Text', elements: [{name: 'checkbox', content: true},
+                                              {name: 'text', content: 'Task 1'}
+                                              ]},
+                    {type: 'TextComment', elements: [{name: 'checkbox', content : false},
+                                                      {name: 'text', content : 'Task 2'},
+                                                      {name: 'comment', content : 'Comment Task 2'}
+                                                      ]}
                 ]},
                 {title : 'Course',
                 items : [
-                    {type: 'TextComment', checked : false, text : 'Jambon', comment:'Le jambon c\'est bon'},
-                    {type: 'Text', checked : true, text : 'Fromage'},
-                    {type: 'Text', checked : false, text : 'Riz'}
+                    {type: 'TextComment', elements: [{name: 'checkbox', content: false},
+                                                     {name: 'text', content: 'Jambon'},
+                                                     {name: 'comment', content: 'Le jambon c\'est bon'}]},
+                    {type: 'Text', elements: [{name: 'checkbox', content: true},
+                                              {name: 'text', content: 'Fromage'}]},
+                    {type: 'Text', elements: [{name: 'checkbox', content: false},
+                                              {name: 'text', content: 'Riz'}]}
                 ]}
             ]
         }

@@ -21,7 +21,7 @@ describe("List", function() {
   it("should have one default item in the list", function() {
     var count = 0;
     for (var itemId in list.mapOfItem_) {
-        expect(list.mapOfItem_[itemId]).toEqual(jasmine.any(sosimplist.ItemBase));
+        expect(list.mapOfItem_[itemId]).toEqual(jasmine.any(sosimplist.ItemComposite));
         count++;
     }
     expect(count).toEqual(1);
@@ -128,8 +128,7 @@ describe("List", function() {
     describe("when all items are checked", function() {
       beforeEach(function() {
         for (var itemId in list.mapOfItem_) {
-            list.mapOfItem_[itemId].check_(true);
-            list.dispatch({name:'checked', target:list.mapOfItem_[itemId]});
+            $('#'+list.mapOfItem_[itemId].elements_[1].view_.id).trigger('click');
         }
       });
 
@@ -145,9 +144,8 @@ describe("List", function() {
       });
 
       it("should restore the item to the main list when all items are checked again", function() {
-        for (var itemId in list.mapOfItem_) {
-            list.mapOfItem_[itemId].check_(false);
-            list.dispatch({name:'checked', target:list.mapOfItem_[itemId]});
+          for (var itemId in list.mapOfItem_) {
+              $('#'+list.mapOfItem_[itemId].elements_[1].view_.id).trigger('click');
         }
         expect($('.sosimplist-container-item')[0].children.length).toEqual(1);
         expect($('.sosimplist-container-item-checked')[0].children.length).toEqual(0);

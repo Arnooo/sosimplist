@@ -1,48 +1,43 @@
+/**
+* @public
+* @constructor
+*/
+sosimplist.ItemFactory = function() {
+    var self_ = this;
+}
 
- /**
-  * @public
-  * @constructor
-  */
- sosimplist.ItemFactory = function() {
-     var self_ = this;
- }
- 
- 
- /**
-  * @public
-  * @param {string} itemType is the type of the item to be created by the factory
-  * @return {object} return the object asked
-  */
- sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
-     if(itemType === 'ItemText'){
-         return new sosimplist.ItemText(parent, options);
-     }
-     else if(itemType === 'ItemTextComment'){
-         return new sosimplist.ItemTextComment(parent, options);
-     }
-     else if(itemType === 'ItemComposite'){
-         var time = (new Date().getTime());
-         var config = {
-             id: 'sosimplist-item'+time,
-             focusOnElementId: 'sosimplist-item-text'+time
-         };
-         var elements = [
-             sosimplist.elementfactory.createElement('selector', {time:time}),
-             sosimplist.elementfactory.createElement('checkbox', {time:time}),
-             sosimplist.elementfactory.createElement('text', {time:time}),
-             sosimplist.elementfactory.createElement('delete', {time:time})
-          ];
-          return new sosimplist.ItemComposite(parent, config, elements);
-     } 
-     else{
-         console.error('Item type = ' + itemType + ' not supported yet !');
+/**
+* @public
+* @param {string} itemType is the type of the item to be created by the factory
+* @return {object} return the object asked
+*/
+sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
+    var itemComposite = null;
+    if(itemType === 'ItemText' || itemType === 'ItemTextComment'){
+        var config = {
+            id: 'sosimplist-item'+options.id,
+            focusOnElementId: 'sosimplist-item-text'+options.id
+        };
+        var elements = [];
+        elements.push(sosimplist.elementfactory.getElementConfiguration('selector', {id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('checkbox', {name: 'checkbox', id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'text', id:options.id, edit: options.edit, content: 'write something'}));
+        if(itemType === 'ItemTextComment'){
+            elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'comment', id:options.id+1, edit: options.edit, content:'write a comment'}));
+        }
+        elements.push(sosimplist.elementfactory.getElementConfiguration('delete', {id:options.id}));
+        itemComposite = new sosimplist.ItemComposite(parent, config, elements);
     }
- }
+    else{
+        console.error('Item type = ' + itemType + ' not supported yet !');
+    }
+    return itemComposite;
+}
 
- /**
- * @private
- * @return {Object}
- */
+/**
+* @private
+* @return {Object}
+*/
 function ItemFactory_create() {
     return new sosimplist.ItemFactory();
 }

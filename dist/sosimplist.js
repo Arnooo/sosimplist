@@ -156,6 +156,8 @@ sosimplist.DefaultDatabaseModule.prototype.set = function(data) {
 sosimplist.Element = function(parent, configuration) {
     try{
         var self_ = this;
+        self_.name_ = configuration.name;
+        self_.type_ = configuration.type;
         self_.parent_ = parent;
         var view = document.createElement(configuration.view.type);
         self_.view_ = sosimplist.mergeObjectProperties(view, configuration.view.properties);
@@ -193,6 +195,22 @@ sosimplist.Element.prototype.getView = function() {
 
 /**
  * @public
+ */
+sosimplist.Element.prototype.getName = function() {
+    var self_ = this;
+    return self_.name_;
+}
+
+/**
+ * @public
+ */
+sosimplist.Element.prototype.getType = function() {
+    var self_ = this;
+    return self_.type_;
+}
+
+/**
+ * @public
  * @param {string} property of this object
  * @return {bool} return element property
  */
@@ -212,12 +230,14 @@ sosimplist.Element.prototype.property = function(property) {
 sosimplist.Element.prototype.serialize = function() {
     try {
         var self_ = this;
-        var content = {
+        var data = {
+            name: self_.name_,
+            content: {}
         };
         for(var i = 0; i < self_.model_.length; i++){
-            content[self_.model_[i]] = self_.view_[self_.model_[i]];
+            data.content[self_.model_[i]] = self_.view_[self_.model_[i]];
         }
-        return content;
+        return data;
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
@@ -231,8 +251,9 @@ sosimplist.Element.prototype.serialize = function() {
 sosimplist.Element.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
-        for(var attr in obj){
-            self_.view_[attr] = obj[attr];
+        self_.name_ = obj.name;
+        for(var i = 0; i < self_.model_.length; i++){
+            self_.view_[self_.model_[i]] = obj.content;
         }
     }
     catch (e) {
@@ -252,43 +273,62 @@ sosimplist.Element.prototype.unserialize = function(obj) {
   * @param {string} elementType is the type of the item to be created by the factory
   * @return {element} return the element asked
   */
- sosimplist.ElementFactory.prototype.createElement = function(elementType, options) {
+ sosimplist.ElementFactory.prototype.getElementConfiguration = function(elementType, options) {
     var element = {};
     if(elementType === 'selector'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'div',
                 properties: {
-                    id: 'sosimplist-item-selector'+options.time,
+                    id: 'sosimplist-item-selector',
                     className: 'sosimplist-item-selector'
                 }
             },
             model: [],
             controller: []
         };
+        if(options){
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
     }
     else if(elementType === 'checkbox'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'input',
                 properties: {
-                    id: 'sosimplist-item-checkbox'+options.time,
+                    id: 'sosimplist-item-checkbox',
                     className: 'sosimplist-item-checkbox',
                     type: 'checkbox',
-                    checked:true
+                    checked:false
                 }
             },
             model: ['checked'], //to be serialized
             controller: [{onEvent:'change',dispatch:'checked'}]
         };
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
     }
     else if(elementType === 'text'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'div',
                 properties: {
-                    id: 'sosimplist-item-text'+options.time,
-                    className: 'sosimplist-item-text sosimplist-editable',
+                    id: 'sosimplist-item-text',
+                    className: 'sosimplist-item-text',
                     contentEditable: true,
                     innerHTML:''
                 },
@@ -299,19 +339,43 @@ sosimplist.Element.prototype.unserialize = function(obj) {
             model: ['innerHTML'],
             controller: []
         };
+        
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+            element.view.properties.contentEditable = options.edit;
+            element.view.attributes.placeholder = sosimplist.translate(options.content);
+            if(options.edit){
+                element.view.properties.className += ' sosimplist-editable';
+            }
+            else{
+                element.view.properties.className += ' sosimplist-edit-false';
+            }
+        }
+        else{
+            //Do nothing
+        }
     }
     else if(elementType === 'delete'){
         element = {
+            name: elementType,
+            type: elementType,
             view: {
                 type: 'div',
                 properties: {
-                    id: 'sosimplist-item-delete'+options.time,
+                    id: 'sosimplist-item-delete',
                     className: 'sosimplist-item-delete'
                 }
             },
             model: [],
             controller: [{onEvent:'click',dispatch:'delete'}]
         };
+        if(options){
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
     }
     else{
         //Do nothing
@@ -984,7 +1048,13 @@ sosimplist.ItemComposite.prototype.serialize = function() {
             elements:[]
         };
         for(var i = 0; i < self_.elements_.length; i++){
-            content.elements.push(self_.elements_[i].serialize());
+            var data = self_.elements_[i].serialize();
+            if(data && data.content){
+                content.elements.push(data);
+            }
+            else{
+                //Do nothing
+            }
         }
         return content;
     }
@@ -1001,58 +1071,62 @@ sosimplist.ItemComposite.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
         for(var i = 0; i < obj.elements.length; i++){
-            self_.elements_[i].unserialize(obj.elements[i]);
+            var found = false;
+            for(var j = 0; j < self_.elements_.length && !found; j++){
+                if(self_.elements_[j].getName() === obj.elements[i].name){
+                    self_.elements_[j].unserialize(obj.elements[i]);
+                    found = true;
+                }
+                else{
+                    //Do nothing
+                }
+            }
         }
     }
     catch (e) {
         console.error(e.name + ': ' + e.message);
     }
 };
+/**
+* @public
+* @constructor
+*/
+sosimplist.ItemFactory = function() {
+    var self_ = this;
+}
 
- /**
-  * @public
-  * @constructor
-  */
- sosimplist.ItemFactory = function() {
-     var self_ = this;
- }
- 
- 
- /**
-  * @public
-  * @param {string} itemType is the type of the item to be created by the factory
-  * @return {object} return the object asked
-  */
- sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
-     if(itemType === 'ItemText'){
-         return new sosimplist.ItemText(parent, options);
-     }
-     else if(itemType === 'ItemTextComment'){
-         return new sosimplist.ItemTextComment(parent, options);
-     }
-     else if(itemType === 'ItemComposite'){
-         var time = (new Date().getTime());
-         var config = {
-             id: 'sosimplist-item'+time,
-             focusOnElementId: 'sosimplist-item-text'+time
-         };
-         var elements = [
-             sosimplist.elementfactory.createElement('selector', {time:time}),
-             sosimplist.elementfactory.createElement('checkbox', {time:time}),
-             sosimplist.elementfactory.createElement('text', {time:time}),
-             sosimplist.elementfactory.createElement('delete', {time:time})
-          ];
-          return new sosimplist.ItemComposite(parent, config, elements);
-     } 
-     else{
-         console.error('Item type = ' + itemType + ' not supported yet !');
+/**
+* @public
+* @param {string} itemType is the type of the item to be created by the factory
+* @return {object} return the object asked
+*/
+sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
+    var itemComposite = null;
+    if(itemType === 'ItemText' || itemType === 'ItemTextComment'){
+        var config = {
+            id: 'sosimplist-item'+options.id,
+            focusOnElementId: 'sosimplist-item-text'+options.id
+        };
+        var elements = [];
+        elements.push(sosimplist.elementfactory.getElementConfiguration('selector', {id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('checkbox', {name: 'checkbox', id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'text', id:options.id, edit: options.edit, content: 'write something'}));
+        if(itemType === 'ItemTextComment'){
+            elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'comment', id:options.id+1, edit: options.edit, content:'write a comment'}));
+        }
+        elements.push(sosimplist.elementfactory.getElementConfiguration('delete', {id:options.id}));
+        itemComposite = new sosimplist.ItemComposite(parent, config, elements);
     }
- }
+    else{
+        console.error('Item type = ' + itemType + ' not supported yet !');
+    }
+    return itemComposite;
+}
 
- /**
- * @private
- * @return {Object}
- */
+/**
+* @private
+* @return {Object}
+*/
 function ItemFactory_create() {
     return new sosimplist.ItemFactory();
 }
@@ -1401,8 +1475,9 @@ sosimplist.List.prototype.unserialize = function(obj) {
         self_.image_ = obj.image;
         self_.mapOfItem_ = {};
         for (var i = 0; i < obj.items.length; i++) {
-            var myItem = sosimplist.itemfactory.create('Item'+obj.items[i].type, self_, self_.options_);
-            obj.items[i].id_ = obj.items[i].id_ ? obj.items[i].id_ : myItem.getId()+i;
+            var opt = self_.options_;
+            opt.id = i;
+            var myItem = sosimplist.itemfactory.create('Item'+obj.items[i].type, self_, opt);
             myItem.unserialize(obj.items[i]);
             myItem.buildView();
             self_.mapOfItem_[myItem.getId()] = myItem;
@@ -1429,7 +1504,9 @@ sosimplist.List.prototype.getId = function() {
 sosimplist.List.prototype.addItem = function(itemElementCurrent) {
     try {
         var self_ = this;
-        var myItem = sosimplist.itemfactory.create('ItemText', self_, self_.options_);
+        var opt = self_.options_;
+        opt.id = (new Date().getTime());
+        var myItem = sosimplist.itemfactory.create('ItemText', self_, opt);
         myItem.buildView();
         self_.mapOfItem_[myItem.getId()] = myItem;
         if (self_.view_ !== null) {
