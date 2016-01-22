@@ -34,6 +34,10 @@ sosimplist.Element = function(parent, configuration) {
             }, 
             false);
         }
+        for(var childId = 0; childId < configuration.view.childs.length; childId++){
+            var childElement = document.createElement(configuration.view.childs[childId].type);
+            self_.view_.appendChild(sosimplist.mergeObjectProperties(childElement, configuration.view.childs[childId].properties));
+        }
         self_.model_ = configuration.model;
     }
     catch(e){
@@ -108,6 +112,15 @@ sosimplist.Element.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
         self_.name_ = obj.name;
+        if(self_.view_.children.length > 0){
+            for(var i = 0; i < obj.values.length; i++){
+                var cloneNode = self_.view_.children[0].cloneNode(true);
+                cloneNode.value = obj.values[i];
+                cloneNode.text = obj.values[i];
+                self_.view_.appendChild(cloneNode);
+            }
+        }
+        
         for(var i = 0; i < self_.model_.length; i++){
             self_.view_[self_.model_[i]] = obj.content;
         }

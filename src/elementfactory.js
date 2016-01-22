@@ -22,7 +22,8 @@
                 properties: {
                     id: 'sosimplist-item-selector',
                     className: 'sosimplist-item-selector'
-                }
+                },
+                childs:[]
             },
             model: [],
             controller: []
@@ -45,7 +46,8 @@
                     className: 'sosimplist-item-checkbox',
                     type: 'checkbox',
                     checked:false
-                }
+                },
+                childs:[]
             },
             model: ['checked'], //to be serialized
             controller: [{onEvent:'change',dispatch:'checked'}]
@@ -72,7 +74,8 @@
                 },
                 attributes:{
                     placeholder: sosimplist.translate('write something'),
-                }
+                },
+                childs:[]
             },
             model: ['innerHTML'],
             controller: []
@@ -94,6 +97,63 @@
             //Do nothing
         }
     }
+    else if(elementType === 'number'){
+        element = {
+            name: elementType,
+            type: elementType,
+            view: {
+                type: 'input',
+                properties: {
+                    id: 'sosimplist-item-number',
+                    className: 'sosimplist-item-number',
+                    type: 'number',
+                    value: 0
+                },
+                childs:[]
+            },
+            model: ['value'], //to be serialized
+            controller: [{onEvent:'change',dispatch:'value'}]
+        };
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
+    }
+    else if(elementType === 'select'){
+        element = {
+            name: elementType,
+            type: elementType,
+            view: {
+                type: 'select',
+                properties: {
+                    id: 'sosimplist-item-select',
+                    className: 'sosimplist-item-select',
+                    value:''
+                },
+                childs:[
+                    {
+                        type: 'option',
+                        properties: {
+                            text: '---',
+                            value: ''
+                        }
+                    }
+                ]
+            },
+            model: ['value'], //to be serialized
+            controller: [{onEvent:'change',dispatch:'value'}]
+        };
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
+    }
     else if(elementType === 'delete'){
         element = {
             name: elementType,
@@ -103,7 +163,8 @@
                 properties: {
                     id: 'sosimplist-item-delete',
                     className: 'sosimplist-item-delete'
-                }
+                },
+                childs:[]
             },
             model: [],
             controller: [{onEvent:'click',dispatch:'delete'}]

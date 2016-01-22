@@ -178,6 +178,10 @@ sosimplist.Element = function(parent, configuration) {
             }, 
             false);
         }
+        for(var childId = 0; childId < configuration.view.childs.length; childId++){
+            var childElement = document.createElement(configuration.view.childs[childId].type);
+            self_.view_.appendChild(sosimplist.mergeObjectProperties(childElement, configuration.view.childs[childId].properties));
+        }
         self_.model_ = configuration.model;
     }
     catch(e){
@@ -252,6 +256,15 @@ sosimplist.Element.prototype.unserialize = function(obj) {
     try {
         var self_ = this;
         self_.name_ = obj.name;
+        if(self_.view_.children.length > 0){
+            for(var i = 0; i < obj.values.length; i++){
+                var cloneNode = self_.view_.children[0].cloneNode(true);
+                cloneNode.value = obj.values[i];
+                cloneNode.text = obj.values[i];
+                self_.view_.appendChild(cloneNode);
+            }
+        }
+        
         for(var i = 0; i < self_.model_.length; i++){
             self_.view_[self_.model_[i]] = obj.content;
         }
@@ -284,7 +297,8 @@ sosimplist.Element.prototype.unserialize = function(obj) {
                 properties: {
                     id: 'sosimplist-item-selector',
                     className: 'sosimplist-item-selector'
-                }
+                },
+                childs:[]
             },
             model: [],
             controller: []
@@ -307,7 +321,8 @@ sosimplist.Element.prototype.unserialize = function(obj) {
                     className: 'sosimplist-item-checkbox',
                     type: 'checkbox',
                     checked:false
-                }
+                },
+                childs:[]
             },
             model: ['checked'], //to be serialized
             controller: [{onEvent:'change',dispatch:'checked'}]
@@ -334,7 +349,8 @@ sosimplist.Element.prototype.unserialize = function(obj) {
                 },
                 attributes:{
                     placeholder: sosimplist.translate('write something'),
-                }
+                },
+                childs:[]
             },
             model: ['innerHTML'],
             controller: []
@@ -356,6 +372,63 @@ sosimplist.Element.prototype.unserialize = function(obj) {
             //Do nothing
         }
     }
+    else if(elementType === 'number'){
+        element = {
+            name: elementType,
+            type: elementType,
+            view: {
+                type: 'input',
+                properties: {
+                    id: 'sosimplist-item-number',
+                    className: 'sosimplist-item-number',
+                    type: 'number',
+                    value: 0
+                },
+                childs:[]
+            },
+            model: ['value'], //to be serialized
+            controller: [{onEvent:'change',dispatch:'value'}]
+        };
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
+    }
+    else if(elementType === 'select'){
+        element = {
+            name: elementType,
+            type: elementType,
+            view: {
+                type: 'select',
+                properties: {
+                    id: 'sosimplist-item-select',
+                    className: 'sosimplist-item-select',
+                    value:''
+                },
+                childs:[
+                    {
+                        type: 'option',
+                        properties: {
+                            text: '---',
+                            value: ''
+                        }
+                    }
+                ]
+            },
+            model: ['value'], //to be serialized
+            controller: [{onEvent:'change',dispatch:'value'}]
+        };
+        if(options){
+            element.name = options.name;
+            element.view.properties.id += options.id;
+        }
+        else{
+            //Do nothing
+        }
+    }
     else if(elementType === 'delete'){
         element = {
             name: elementType,
@@ -365,7 +438,8 @@ sosimplist.Element.prototype.unserialize = function(obj) {
                 properties: {
                     id: 'sosimplist-item-delete',
                     className: 'sosimplist-item-delete'
-                }
+                },
+                childs:[]
             },
             model: [],
             controller: [{onEvent:'click',dispatch:'delete'}]
@@ -1102,12 +1176,12 @@ sosimplist.ItemFactory = function() {
 */
 sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
     var itemComposite = null;
+    var config = {
+        id: 'sosimplist-item'+options.id,
+        focusOnElementId: 'sosimplist-item-text'+options.id
+    };
+    var elements = [];
     if(itemType === 'ItemText' || itemType === 'ItemTextComment'){
-        var config = {
-            id: 'sosimplist-item'+options.id,
-            focusOnElementId: 'sosimplist-item-text'+options.id
-        };
-        var elements = [];
         elements.push(sosimplist.elementfactory.getElementConfiguration('selector', {id:options.id}));
         elements.push(sosimplist.elementfactory.getElementConfiguration('checkbox', {name: 'checkbox', id:options.id}));
         elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'text', id:options.id, edit: options.edit, content: 'write something'}));
@@ -1115,6 +1189,12 @@ sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
             elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'comment', id:options.id+1, edit: options.edit, content:'write a comment'}));
         }
         elements.push(sosimplist.elementfactory.getElementConfiguration('delete', {id:options.id}));
+        itemComposite = new sosimplist.ItemComposite(parent, config, elements);
+    }
+    else if(itemType === 'ItemIngredient'){
+        elements.push(sosimplist.elementfactory.getElementConfiguration('number', {name: 'quantity', id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('select', {name: 'unit', id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'text', id:options.id, edit: options.edit, content: 'ingredient'}));
         itemComposite = new sosimplist.ItemComposite(parent, config, elements);
     }
     else{

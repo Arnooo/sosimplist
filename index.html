@@ -16,9 +16,9 @@
                     src: 'http://commentvoyager.info/wp-content/uploads/2015/11/passport-tampon-visa-small.png'
                 },
                 items : [
-                    {type: 'Text', elements: [{name: 'checkbox', content: true},
-                                              {name: 'text', content: 'Task 1'}
-                                              ]},
+                    {type: 'Ingredient', elements: [{name: 'quantity', type:'number', content: 10},
+                                                    {name: 'unit', type:'select', content: 'ml', values: ['ml', 'cl', 'l']}
+                                                    ]},
                     {type: 'TextComment', elements: [{name: 'checkbox', content : false},
                                                       {name: 'text', content : 'Task 2'},
                                                       {name: 'comment', content : 'Comment Task 2'}

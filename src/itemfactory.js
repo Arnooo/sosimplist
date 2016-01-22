@@ -13,12 +13,12 @@ sosimplist.ItemFactory = function() {
 */
 sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
     var itemComposite = null;
+    var config = {
+        id: 'sosimplist-item'+options.id,
+        focusOnElementId: 'sosimplist-item-text'+options.id
+    };
+    var elements = [];
     if(itemType === 'ItemText' || itemType === 'ItemTextComment'){
-        var config = {
-            id: 'sosimplist-item'+options.id,
-            focusOnElementId: 'sosimplist-item-text'+options.id
-        };
-        var elements = [];
         elements.push(sosimplist.elementfactory.getElementConfiguration('selector', {id:options.id}));
         elements.push(sosimplist.elementfactory.getElementConfiguration('checkbox', {name: 'checkbox', id:options.id}));
         elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'text', id:options.id, edit: options.edit, content: 'write something'}));
@@ -26,6 +26,12 @@ sosimplist.ItemFactory.prototype.create = function(itemType, parent, options) {
             elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'comment', id:options.id+1, edit: options.edit, content:'write a comment'}));
         }
         elements.push(sosimplist.elementfactory.getElementConfiguration('delete', {id:options.id}));
+        itemComposite = new sosimplist.ItemComposite(parent, config, elements);
+    }
+    else if(itemType === 'ItemIngredient'){
+        elements.push(sosimplist.elementfactory.getElementConfiguration('number', {name: 'quantity', id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('select', {name: 'unit', id:options.id}));
+        elements.push(sosimplist.elementfactory.getElementConfiguration('text', {name: 'text', id:options.id, edit: options.edit, content: 'ingredient'}));
         itemComposite = new sosimplist.ItemComposite(parent, config, elements);
     }
     else{
